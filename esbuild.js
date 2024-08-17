@@ -37,6 +37,9 @@ async function main() {
 		outfile: 'dist/extension.js',
 		external: ['vscode'],
 		logLevel: 'silent',
+		banner: {
+			'js': require('fs').readFileSync('./src/utils/prepend.js').toString()
+		},
 		plugins: [
 			/* add to the end of plugins array */
 			esbuildProblemMatcherPlugin,
