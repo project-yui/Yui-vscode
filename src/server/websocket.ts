@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { BotActionRequest, BotActionResponse } from './types';
 import { randomUUID } from 'crypto';
+import EventEmitter from 'events';
 
 let server: WebSocket | undefined = undefined;
 
@@ -21,9 +22,11 @@ interface WaitData {
 }
 
 /**
- * 
+ * 异步转同步
  */
 const waitMap: Record<string, WaitData> = {};
+
+const eventHandle = new EventEmitter();
 
 /**
  * 收到消息处理
@@ -32,7 +35,13 @@ const waitMap: Record<string, WaitData> = {};
  */
 const receive = (data: WebSocket.RawData) => {
     console.log('receive:', data.toString());
-    const resp = JSON.parse(data.toString()) as BotActionResponse;
+    let resp = JSON.parse(data.toString());
+    if (!resp.id)
+    {
+        // event
+        eventHandle.emit(resp.detail_type, resp);
+        return;
+    }
     if (!waitMap[resp.id]) {return;}
     const wait = waitMap[resp.id];
     clearTimeout(wait.timer);
@@ -95,7 +104,11 @@ const send = async <Req, Resp>(action: string, params: Req) => {
         server?.send(JSON.stringify(req));
     });
 };
+const getServerEventHandle = () => {
+    return eventHandle;
+};
 
 export const useWSServer = () => ({
-    send
+    send,
+    getServerEventHandle,
 });

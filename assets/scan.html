@@ -1,0 +1,50 @@
+
+<div>
+    <!-- <span>webview</span><br /> -->
+    <img id="qrcode" src="" /><br />
+    <span id="status">wait scan</span><br />
+    <span id="time">0</span><br />
+    <button data-vscode-context='{"preventDefaultContextMenuItems": true }' onclick="refreshQrCode()">刷新</button>
+    <script>
+    const vscode = acquireVsCodeApi();
+    (function() {
+        const status = document.getElementById('status');
+        const qrcode = document.getElementById('qrcode');
+
+        let cnt = 0
+        window.addEventListener('message', event => {
+            const message = event.data; // The JSON data our extension sent
+            console.log('receive from main:', message)
+            switch (message.command) {
+                case 'timeout':
+                    cnt = -1;
+                    qrcode.src = ''
+                    status.textContent = 'timeout';
+                    break;
+                case 'qrcode':
+                    cnt = 0;
+                    status.textContent = 'wait scan';
+                    qrcode.src = message.data;
+                    break;
+            }
+        });
+        console.log('send msg to main')
+        vscode.postMessage({
+            command: 'refresh-qrcode',
+        })
+        setInterval(() => {
+            const time = document.getElementById('time');
+            if (cnt >= 0) {
+                ++cnt;
+            }
+            time.textContent = cnt;
+        }, 1000)
+    }());
+    function refreshQrCode(){
+        console.log('refresh qrcode')
+        vscode.postMessage({
+            command: 'refresh-qrcode',
+        })
+    }
+    </script>
+</div>
