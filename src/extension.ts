@@ -5,6 +5,7 @@ import { install } from './utils/install';
 import { ChildProcess, ChildProcessWithoutNullStreams, spawn, spawnSync } from 'child_process';
 import path from 'path';
 import { existsSync, rmSync, rmdirSync } from 'fs';
+import { loginCommand, scanLoginCommand } from './commands/login';
 
 let qqProcess: ChildProcessWithoutNullStreams | null = null;
 // This method is called when your extension is activated
@@ -84,14 +85,25 @@ export function activate(context: vscode.ExtensionContext) {
 		let installCommand = vscode.commands.registerCommand('yukihana.start', async () => {
 			// The code you place here will be executed every time your command is executed
 			// Display a message box to the user
-			// TODO: 启动后台服务
+			if (qqProcess !== null)
+			{
+				vscode.window.showInformationMessage('已经启动了...');
+				return;
+			}
 			vscode.window.showInformationMessage('Start...');
-			const exePath = path.resolve(__dirname, './program/QQ.exe');
+			let exePath = path.resolve(__dirname, './program/QQ.exe');
+			let args = ['resources/app/app_launcher/index.js'];
 			console.log('exe:', exePath);
 			const cp = require('child_process');
 			// 有日志，但是kill杀不死，仅调试用
 			// qqProcess = cp.spawn('cmd.exe', ['/C', `${exePath} > .\\tmp\\output.log 2>&1`], {
-			qqProcess = cp.spawn(exePath, ['resources/app/app_launcher/index.js'], {
+			const debug = true;
+			if (debug)
+			{
+				args = ['/C', `${exePath} > .\\tmp\\output.log 2>&1`];
+				exePath = 'cmd.exe';
+			}
+			qqProcess = cp.spawn(exePath, args, {
 				
 				env: {
 					...process.env,
@@ -124,6 +136,12 @@ export function activate(context: vscode.ExtensionContext) {
 		context.subscriptions.push(installCommand);
 	}
 	{
+		let login = vscode.commands.registerCommand('yukihana.login', loginCommand);
+		context.subscriptions.push(login);
+		let scanLogin = vscode.commands.registerCommand('yukihana.scan', scanLoginCommand);
+		context.subscriptions.push(scanLogin);
+	}
+	{
 		if (!context.globalState.get<boolean>('yukihana.install'))
 		{
 			// 未安装
@@ -145,7 +163,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('yukihana.start');
 		}
 	}
-	
+	vscode.commands.executeCommand('setContext', 'isNeedLogin', true);
 }
 
 // This method is called when your extension is deactivated

@@ -75,6 +75,13 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "self-list",
+        "contents": "未登录账号，请先登录\n[账号登录](command:yukihana.login)\n[扫码登录](command:yukihana.scan)",
+        "when": "isNeedLogin"
+      }
+    ],
     "views": {
       "yukihana-explorer": [
         {
@@ -114,6 +121,7 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
     "@types/vscode": "^1.89.0",
+    "@types/ws": "^8.5.12",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "@vscode/test-cli": "^0.0.9",
@@ -124,6 +132,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "nodejs-file-downloader": "^4.13.0"
+    "nodejs-file-downloader": "^4.13.0",
+    "ws": "^8.18.0"
   }
 }
