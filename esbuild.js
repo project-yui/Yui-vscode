@@ -38,7 +38,7 @@ async function main() {
 		external: ['vscode'],
 		logLevel: 'silent',
 		banner: {
-			'js': require('fs').readFileSync('./src/utils/prepend.js').toString()
+			'js': require('fs').readFileSync('./src/common/prepend.js').toString()
 		},
 		plugins: [
 			/* add to the end of plugins array */

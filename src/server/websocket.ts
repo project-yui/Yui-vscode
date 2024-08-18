@@ -2,7 +2,9 @@ import WebSocket from 'ws';
 import { BotActionRequest, BotActionResponse } from './types';
 import { randomUUID } from 'crypto';
 import EventEmitter from 'events';
+import { useLogger } from '../common/log';
 
+const log = useLogger('WebSocket');
 let server: WebSocket | undefined = undefined;
 
 interface WaitData {
@@ -34,7 +36,7 @@ const eventHandle = new EventEmitter();
  * @param data 收到的消息
  */
 const receive = (data: WebSocket.RawData) => {
-    console.log('receive:', data.toString());
+    log.info('receive:', data.toString());
     let resp = JSON.parse(data.toString());
     if (!resp.id)
     {
@@ -73,7 +75,7 @@ const send = async <Req, Resp>(action: string, params: Req) => {
         server.on('message', receive);
     }
     for (let i = 0; i < 5; i++) {
-        console.log('check...');
+        log.info('check...');
         if (server.readyState === WebSocket.OPEN)
         {
             break;

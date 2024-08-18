@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { useWSServer } from '../server/websocket';
 import { useLogger } from '../common/log';
 import { useGlobal } from '../common/global';
+import { EventDataType } from '../server/types';
 
 const log = useLogger('Login');
 export const loginCommand = async () => {
@@ -54,9 +55,33 @@ export const scanLoginCommand = async () => {
     const { getServerEventHandle } = useWSServer();
     const handle = getServerEventHandle();
 
-    const update = (resp: any) => {
+    const update = (resp: EventDataType<any>) => {
         log.info('qrcode error:', resp);
-        panel.webview.postMessage({ command: 'timeout' });
+        switch (resp.detail_type) {
+            case 'qrcode_error':
+                panel.webview.postMessage({ command: 'timeout' });
+                break;
+            case 'qrcode_scaned':
+                panel.webview.postMessage({
+                    command: 'scaned',
+                    data: {
+                        avatarUrl: resp.data.avatar_url
+                    },
+                });
+                break;
+            case 'qrcode_userLogged':
+                vscode.window.showWarningMessage(`${resp.data.uin} 已经是登录状态，不能重复登录！`);
+                vscode.commands.executeCommand('setContext', 'isNeedLogin', false);
+                panel.dispose();
+                break;
+            case 'qrcode_success':
+                vscode.window.showInformationMessage(`${resp.data.uin} 登录成功！`);
+                vscode.commands.executeCommand('setContext', 'isNeedLogin', false);
+                panel.dispose();
+                break;
+            default:
+                break;
+        }
     };
     const loadQrCode = async () => {
         handle.removeListener('qrcode_error', update);
@@ -64,6 +89,9 @@ export const scanLoginCommand = async () => {
         const resp = await ws.send<{}, QrCodeResponse>('login_by_qrcode', {});
         panel.webview.postMessage({ command: 'qrcode', data: resp.qrCodeImage });
         handle.once('qrcode_error', update);
+        handle.once('qrcode_scaned', update);
+        handle.once('qrcode_success', update);
+        handle.once('qrcode_userLogged', update);
         setTimeout(() => {
             handle.removeListener('qrcode_error', update);
         }, (resp.expireTime + 5) * 1000);

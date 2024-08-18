@@ -75,13 +75,6 @@
         }
       ]
     },
-    "viewsWelcome": [
-      {
-        "view": "self-list",
-        "contents": "未登录账号，请先登录\n[账号登录](command:yukihana.login)\n[扫码登录](command:yukihana.scan)",
-        "when": "isNeedLogin"
-      }
-    ],
     "views": {
       "yukihana-explorer": [
         {
@@ -101,7 +94,14 @@
           "name": "频道列表"
         }
       ]
-    }
+    },
+    "viewsWelcome": [
+      {
+        "view": "self-list",
+        "contents": "未登录账号，请先登录\n[账号登录](command:yukihana.login)\n[扫码登录](command:yukihana.scan)",
+        "when": "isNeedLogin"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",

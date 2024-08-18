@@ -1,15 +1,15 @@
 
 <div>
     <!-- <span>webview</span><br /> -->
-    <img id="qrcode" src="" /><br />
+    <img id="qrcode" style="height: 100px;width: 100px;" src="" /><br />
     <span id="status">wait scan</span><br />
     <span id="time">0</span><br />
     <button data-vscode-context='{"preventDefaultContextMenuItems": true }' onclick="refreshQrCode()">刷新</button>
     <script>
     const vscode = acquireVsCodeApi();
     (function() {
-        const status = document.getElementById('status');
         const qrcode = document.getElementById('qrcode');
+        const status = document.getElementById('status');
 
         let cnt = 0
         window.addEventListener('message', event => {
@@ -20,6 +20,11 @@
                     cnt = -1;
                     qrcode.src = ''
                     status.textContent = 'timeout';
+                    break;
+                case 'scaned':
+                    cnt = 0;
+                    status.textContent = 'scaned';
+                    qrcode.src = message.data.avatarUrl;
                     break;
                 case 'qrcode':
                     cnt = 0;
