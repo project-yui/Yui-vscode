@@ -78,7 +78,8 @@
     "views": {
       "yukihana-explorer": [
         {
-          "id": "self-list",
+          "id": "yukihana.userInfoView",
+          "type": "webview",
           "name": "QQ信息"
         },
         {
@@ -96,11 +97,6 @@
       ]
     },
     "viewsWelcome": [
-      {
-        "view": "self-list",
-        "contents": "未登录账号，请先登录\n[账号登录](command:yukihana.login)\n[扫码登录](command:yukihana.scan)",
-        "when": "isNeedLogin"
-      }
     ]
   },
   "scripts": {

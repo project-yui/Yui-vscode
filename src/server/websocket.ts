@@ -67,6 +67,7 @@ const delay = async (time: number) => {
  * 发送websocket消息
  */
 const send = async <Req, Resp>(action: string, params: Req) => {
+    log.info('send msg:', action, params);
     if (!server || server.readyState === WebSocket.CLOSED || server.readyState === WebSocket.CLOSING)
     {
         server = new WebSocket('ws://127.0.0.1:8080', {

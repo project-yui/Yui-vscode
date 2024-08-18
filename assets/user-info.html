@@ -1,0 +1,49 @@
+<div>
+    user info
+    <div>
+        <div>
+            头像:
+            <img id="infoAvatar" style="height: 100px;width: 100px;"></span>
+        </div>
+        <div>
+            QQ:
+            <span id="infoUin"></span>
+        </div>
+        <div>
+            昵称:
+            <span id="infoNick"></span>
+        </div>
+    </div>
+    <script>
+    const vscode = acquireVsCodeApi();
+    
+    window.addEventListener('message', event => {
+        const message = event.data; // The JSON data our extension sent
+        console.log('receive from main:', message)
+        switch (message.command) {
+            case 'update-user-info':
+                {
+                    infoAvatar.src = message.data.avatar_url
+                    infoUin.textContent = message.data.user_uin
+                    infoNick.textContent = message.data.nick
+                }
+                break;
+        }
+    })
+    setInterval(() => {
+        if (infoUin.textContent.length === 0)
+        {
+            vscode.postMessage({
+                command: 'query-user-info',
+                data: {
+                }
+            })
+        }
+    }, 1000)
+    vscode.postMessage({
+        command: 'query-user-info',
+        data: {
+        }
+    })
+    </script>
+</div>

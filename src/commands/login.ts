@@ -20,7 +20,7 @@ export const loginCommand = async () => {
     console.log('账号：', id, '密码：', pass);
 };
 
-interface QrCodeResponse {
+export interface QrCodeResponse {
     qrCodeImage: string
     qrCodeUrl: string
     expireTime: number

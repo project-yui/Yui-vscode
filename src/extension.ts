@@ -7,6 +7,10 @@ import path from 'path';
 import { existsSync, rmSync, rmdirSync } from 'fs';
 import { loginCommand, scanLoginCommand } from './commands/login';
 import { useGlobal } from './common/global';
+import { useLogger } from './common/log';
+import { init } from './init';
+
+const log = useLogger('Extension');
 
 let qqProcess: ChildProcessWithoutNullStreams | null = null;
 // This method is called when your extension is activated
@@ -19,19 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "qq" is now active!');
 	console.log('current path:', __dirname);
-	{
-		// The command has been defined in the package.json file
-		// Now provide the implementation of the command with registerCommand
-		// The commandId parameter must match the command field in package.json
-		// package.json提供入口，具体逻辑需要注册
-		let disposable = vscode.commands.registerCommand('yukihana.helloWorld', () => {
-			// The code you place here will be executed every time your command is executed
-			// Display a message box to the user
-			vscode.window.showInformationMessage('Hello World from hot-vscode!');
-		});
-
-		context.subscriptions.push(disposable);
-	}
 	{
 		let installCommand = vscode.commands.registerCommand('yukihana.install', async () => {
 			// The code you place here will be executed every time your command is executed
@@ -166,7 +157,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('yukihana.start');
 		}
 	}
-	vscode.commands.executeCommand('setContext', 'isNeedLogin', true);
+	init(context);
 }
 
 // This method is called when your extension is deactivated

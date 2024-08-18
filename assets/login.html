@@ -1,0 +1,175 @@
+
+<div>
+    <style>
+        .hide {
+            display: none;
+        }
+    </style>
+    <select id="login-mode">
+        <option label="qrcode" value="qrcode" selected>1</option>
+        <option label="quick" value="quick">2</option>
+        <option label="account" value="account">3</option>
+    </select>
+    <div id="qrCodeScanLogin" class="qrcode-login">
+        <img id="qrcode" style="height: 100px;width: 100px;" src="" /><br />
+        <span id="status">wait scan</span><br />
+        <span id="time">0</span><br />
+        <button data-vscode-context='{"preventDefaultContextMenuItems": true }' onclick="refreshQrCode()">刷新</button>
+    </div>
+    <div id="quickLogin" class="quick-login hide">
+        <img src="" />
+        <br />
+        QQ: 
+        <select id="quick-login-account" onchange="selectQuickLoginAccount">
+        </select>
+        <br />
+        <span id="quick-login-result"></span>
+        <br />
+        <button data-vscode-context='{"preventDefaultContextMenuItems": true }' onclick="quickLogin()">快速登录</button>
+    </div>
+    <div id="accountLogin" class="account-login hide">
+        <label for="uin">
+            <span>QQ号：</span><input id="uin" />
+        </label>
+        <br />
+        <label for="uin">
+            <span>QQ密码：</span><input id="password" type="password" />
+        </label>
+        <br />
+        <button data-vscode-context='{"preventDefaultContextMenuItems": true }' onclick="accountLogin()">登录</button>
+    </div>
+    <script>
+    console.log('login.html')
+    const vscode = acquireVsCodeApi();
+    const qrcode = document.getElementById('qrcode');
+    const status = document.getElementById('status');
+
+    let cnt = 0
+    let timer = setInterval(() => {
+        const time = document.getElementById('time');
+        if (cnt >= 0) {
+            ++cnt;
+        }
+        time.textContent = cnt;
+    }, 1000);
+
+    document.getElementById('login-mode').addEventListener('change', (e) => {
+        const v = e.target.value
+        console.log('select:', v)
+        changeMode(v)
+    })
+    /**
+     * 
+     * @param mode {'scan' | 'quick' | 'account'}
+     * */
+    function changeMode(mode)
+    {
+        const divInfo = {
+            scan: document.getElementById('qrCodeScanLogin'),
+            quick: document.getElementById('quickLogin'),
+            account: document.getElementById('accountLogin'),
+        }
+        divInfo.scan.classList.add('hide')
+        divInfo.quick.classList.add('hide')
+        divInfo.account.classList.add('hide')
+        if (mode === 'qrcode')
+        {
+            // 扫码登录
+            divInfo.scan.classList.remove('hide')
+            vscode.postMessage({
+                command: 'refresh-qrcode',
+            })
+        }
+        else if (mode === 'quick')
+        {
+            // 快速登录
+            divInfo.quick.classList.remove('hide')
+            vscode.postMessage({
+                command: 'query-quickList',
+            })
+        }
+        else if (mode === 'account')
+        {
+            // 账户密码
+            divInfo.account.classList.remove('hide')
+        }
+    };
+    let quickLoginList = []
+    const selectQuickLoginAccount = (e) => {
+        const v = e.target.value
+        console.log('select account:', v)
+    }
+    window.addEventListener('message', event => {
+        const message = event.data; // The JSON data our extension sent
+        console.log('receive from main:', message)
+        switch (message.command) {
+            case 'timeout':
+                cnt = -1;
+                qrcode.src = ''
+                status.textContent = 'timeout';
+                break;
+            case 'scaned':
+                cnt = 0;
+                status.textContent = 'scaned';
+                qrcode.src = message.data.avatarUrl;
+                break;
+            case 'qrcode':
+                cnt = 0;
+                status.textContent = 'wait scan';
+                qrcode.src = message.data;
+                break;
+            case 'quick-login-list':
+                {
+                    const quickLoginSelect = document.getElementById('quick-login-account');
+                    quickLoginSelect.innerHTML = '' // 清空
+
+                    const list = message.data
+                    quickLoginList = list;
+                    for (let i = 0; i < list.length; i++) {
+                        const item = list[i];
+                        const option = document.createElement('option')
+                        option.value = i
+                        option.textContent = item.uin
+                        option.selected = i === 0
+                        quickLoginSelect.appendChild(option)
+                    }
+                }
+                break;
+            case 'quick-login-result':
+                {
+                    const quickLoginResult = document.getElementById('quick-login-result');
+                    quickLoginResult.textContent = message.data
+                }
+                break;
+            case 'change-mode':
+                changeMode(message.data.mode, message.data.data)
+                break;
+        }
+    });
+
+    function refreshQrCode()
+    {
+        console.log('refresh qrcode')
+        vscode.postMessage({
+            command: 'refresh-qrcode',
+        })
+    }
+    function quickLogin()
+    {
+        console.log('快速登录')
+        const quickLoginSlecte = document.getElementById('quick-login-account');
+        const account = quickLoginList[parseInt(quickLoginSlecte.value)]
+        vscode.postMessage({
+            command: 'quick-login',
+            data: {
+                uin: account.uin
+            }
+        })
+    }
+    function accountLogin()
+    {
+        console.log('账户密码登录')
+    }
+    refreshQrCode()
+    </script>
+</div>
