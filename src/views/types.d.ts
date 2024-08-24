@@ -23,3 +23,16 @@ export interface QuickLoginItem {
      */
     is_auto_login: boolean
 }
+
+export interface FriendGroupItemType {
+    id: number,
+    name: string
+    count: number
+    friend_list: FriendItemType[]
+}
+export interface FriendItemType {
+    uin: `${number}`,
+    nick: string
+    remark: string
+    avatar_url: string
+}

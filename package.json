@@ -64,6 +64,11 @@
       {
         "command": "yukihana.stop",
         "title": "Yukihan: Stop"
+      },
+      {
+        "command": "yukihana.refreshFriendList",
+        "title": "Yukihan: Refresh Friend List",
+        "icon": "$(extensions-refresh)"
       }
     ],
     "viewsContainers": {
@@ -83,8 +88,9 @@
           "name": "QQ信息"
         },
         {
-          "id": "friend-list",
-          "name": "好友列表"
+          "id": "yukihana.friendTreeView",
+          "name": "好友列表",
+          "type": "tree"
         },
         {
           "id": "group-list",
@@ -97,7 +103,16 @@
       ]
     },
     "viewsWelcome": [
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "yukihana.refreshFriendList",
+          "when": "view == yukihana.friendTreeView",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
