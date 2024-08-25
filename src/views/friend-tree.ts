@@ -30,7 +30,7 @@ export class FriendTreeProvider implements vscode.TreeDataProvider<FriendItem> {
             return Promise.resolve(groups);
         }
     }
-    updateFriendData(data: FriendGroupItemType[]) {
+    updateGroupData(data: FriendGroupItemType[]) {
         this.friendList = data;
         this._onDidChangeTreeData.fire(undefined);
     }

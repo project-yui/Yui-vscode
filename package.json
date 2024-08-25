@@ -54,7 +54,7 @@
         "title": "Yukihan: Install QQ"
       },
       {
-        "command": "yukihana.install-force",
+        "command": "yukihana.installForce",
         "title": "Yukihan: Install QQ Force"
       },
       {
@@ -68,6 +68,11 @@
       {
         "command": "yukihana.refreshFriendList",
         "title": "Yukihan: Refresh Friend List",
+        "icon": "$(extensions-refresh)"
+      },
+      {
+        "command": "yukihana.refreshGroupList",
+        "title": "Yukihan: Refresh Group List",
         "icon": "$(extensions-refresh)"
       }
     ],
@@ -93,7 +98,7 @@
           "type": "tree"
         },
         {
-          "id": "group-list",
+          "id": "yukihana.groupTreeView",
           "name": "群列表"
         },
         {
@@ -109,6 +114,11 @@
         {
           "command": "yukihana.refreshFriendList",
           "when": "view == yukihana.friendTreeView",
+          "group": "navigation"
+        },
+        {
+          "command": "yukihana.refreshGroupList",
+          "when": "view == yukihana.groupTreeView",
           "group": "navigation"
         }
       ]

@@ -36,3 +36,34 @@ export interface FriendItemType {
     remark: string
     avatar_url: string
 }
+export interface GroupGroupItemType {
+    id: number
+    name: string
+    type: 'top' | 'unname' | 'create' | 'manage' | 'join'
+    groupList: GroupItemType[]
+}
+export interface GroupItemType {
+    /**
+     * vscode用的id
+     */
+    id: string
+    /**
+     * 群号
+     */
+    code: `${number}`
+    name: string
+    avatarUrl: string
+    role: 'owner' | 'member' | 'manager'
+    top: boolean
+    toppedTimestamp: number
+}
+
+export interface GroupDetailInfoResp {
+    code: `${number}`
+    name: string
+    avatar_url: string
+    role: 'owner' | 'member' | 'manager'
+    top: boolean
+    topped_timestamp: number
+    is_conf: boolean
+}

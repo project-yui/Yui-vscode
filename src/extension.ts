@@ -43,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 
 		context.subscriptions.push(installCommand);
-		let installForceCommand = vscode.commands.registerCommand('yukihana.install-force', async () => {
+		let installForceCommand = vscode.commands.registerCommand('yukihana.installForce', async () => {
 			// The code you place here will be executed every time your command is executed
 			// Display a message box to the user
 			if (qqProcess !== null)
