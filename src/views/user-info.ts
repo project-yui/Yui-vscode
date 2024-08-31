@@ -4,6 +4,7 @@ import { EventDataType } from '../server/types';
 import { useLogger } from '../common/log';
 import { QrCodeResponse } from '../commands/login';
 import { QuickLoginItem } from './types';
+import { getHtml } from '../common/webview';
 
 const log = useLogger('UserInfoView');
 export class UserInfoViewProvider implements vscode.WebviewViewProvider {
@@ -168,36 +169,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
         }
     }
 	private _getHtmlForWebview(webview: vscode.Webview) {
-		// Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-        const preload = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'assets', 'preload.js'));
-		const scanSrc = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'assets', this._page));
-
-		// Use a nonce to only allow a specific script to be run.
-		// const nonce = getNonce();
-
-		return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-
-				<!--
-					Use a content security policy to only allow loading styles from our extension directory,
-					and only allow scripts that have a specific nonce.
-					(See the 'webview-sample' extension sample for img-src content security policy examples)
-				-->
-
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-				<title>User Info</title>
-			</head>
-			<body>
-                <div id="container"></div><br />
-                <script>
-                    window.pageSrc = '${scanSrc}'
-                </script>
-                <script src="${preload}" />
-			</body>
-			</html>`;
+		return getHtml(webview, this._page);
 	}
 }
 

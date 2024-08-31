@@ -20,7 +20,7 @@ export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
         log.info('get children:', element);
         if (element) {
             const group = this.groupList.find(e => `${e.id}` === element.id);
-            const ret = group?.groupList.map(e => new GroupItem(e.id, e.name, '', e.avatarUrl, vscode.TreeItemCollapsibleState.None));
+            const ret = group?.groupList.map(e => new GroupItem(e.id, e.name, e.code, e.avatarUrl, vscode.TreeItemCollapsibleState.None));
             
             return Promise.resolve(ret || []);
         }
@@ -126,15 +126,19 @@ class GroupItem extends vscode.TreeItem {
     constructor(
         public readonly id: string,
         public readonly label: string,
-        private remark: string,
+        private groupCode: string,
         private avatarUrl: string,
         public readonly collapsibleState: vscode.TreeItemCollapsibleState
     ) {
         super(label, collapsibleState);
-        this.tooltip = `${this.label}-${this.remark}`;
-        this.description = this.remark;
+        this.tooltip = `${this.label}-${this.groupCode}`;
+        this.description = this.groupCode;
         if (this.avatarUrl.length > 0) {
             this.iconPath = vscode.Uri.parse(this.avatarUrl);
+        }
+        if (collapsibleState === vscode.TreeItemCollapsibleState.None)
+        {
+            this.command = { command: 'yukihana.openGroup', title: "Open Group Chat", arguments: [this.groupCode], };
         }
     }
     

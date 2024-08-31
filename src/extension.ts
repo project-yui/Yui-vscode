@@ -2,10 +2,9 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { install } from './common/install';
-import { ChildProcess, ChildProcessWithoutNullStreams, spawn, spawnSync } from 'child_process';
+import { ChildProcessWithoutNullStreams } from 'child_process';
 import path from 'path';
-import { existsSync, rmSync, rmdirSync } from 'fs';
-import { loginCommand, scanLoginCommand } from './commands/login';
+import { existsSync, rmSync } from 'fs';
 import { useGlobal } from './common/global';
 import { useLogger } from './common/log';
 import { init } from './init';
@@ -24,25 +23,6 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "qq" is now active!');
 	console.log('current path:', __dirname);
 	{
-		let installCommand = vscode.commands.registerCommand('yukihana.install', async () => {
-			// The code you place here will be executed every time your command is executed
-			// Display a message box to the user
-			try {
-					
-				if(context.globalState.get<boolean>('yukihana.install'))
-				{
-					vscode.window.showInformationMessage('Already installed!');
-					return;
-				}
-				await install();
-				await context.globalState.update('yukihana.install', true);
-				vscode.window.showInformationMessage('Install successful!');
-			} catch (error) {
-				console.log(error);
-			}
-		});
-
-		context.subscriptions.push(installCommand);
 		let installForceCommand = vscode.commands.registerCommand('yukihana.installForce', async () => {
 			// The code you place here will be executed every time your command is executed
 			// Display a message box to the user
@@ -128,12 +108,6 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 
 		context.subscriptions.push(installCommand);
-	}
-	{
-		let login = vscode.commands.registerCommand('yukihana.login', loginCommand);
-		context.subscriptions.push(login);
-		let scanLogin = vscode.commands.registerCommand('yukihana.scan', scanLoginCommand);
-		context.subscriptions.push(scanLogin);
 	}
 	{
 		if (!context.globalState.get<boolean>('yukihana.install'))

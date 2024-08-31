@@ -1,0 +1,55 @@
+<div>
+    <style>
+        .chat-list {
+            background-color: rgb(61, 58, 58);
+        }
+        .chat-list > .chat-item {
+            padding: .5rem;
+            display: flex;
+        }
+        .chat-list > .chat-item > .avatar {
+            padding: 5px;
+        }
+        .chat-list > .self {
+            flex-flow: row-reverse;
+        }
+    </style>
+    <div class="chat-list">
+        <div class="chat-item">
+            <div class="avatar">
+                头像
+            </div>
+            <div>
+                <span>昵称一</span>
+                <div>群友第一条消息<br/>aaaa<br />222</div>
+            </div>
+        </div>
+        <div class="chat-item">
+            <div class="avatar">
+                头像
+            </div>
+            <div>
+                <span>昵称二</span>
+                <div>群友第二条消息</div>
+            </div>
+        </div>
+        <div class="chat-item self">
+            <div class="avatar">
+                头像
+            </div>
+            <div>
+                <span>我的昵称</span>
+                <div>我的消息,121323<br>15454asdafbj</div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <hr>
+    <br />
+    <div>
+        发送区域
+        <br />
+        <textarea></textarea>
+        <button>发送</button>
+    </div>
+</div>

@@ -4,9 +4,8 @@ import { useLogger } from './common/log';
 import { UserInfoViewProvider } from './views/user-info';
 import { FriendTreeProvider } from './views/friend-tree';
 import { useGlobal } from './common/global';
-import { FriendGroupItemType, GroupDetailInfoResp, GroupGroupItemType } from './views/types';
-import { sleep } from './common/sleep';
 import { GroupTreeProvider } from './views/group-tree';
+import { registerCommands } from './commands/register';
 
 const log = useLogger('Init');
 
@@ -22,22 +21,10 @@ export const init = async (context: vscode.ExtensionContext) => {
     
     const groupTreeView = new GroupTreeProvider();
     context.subscriptions.push(vscode.window.registerTreeDataProvider(GroupTreeProvider.viewId, groupTreeView));
-	addView(FriendTreeProvider.viewId, groupTreeView);
-
+	addView(GroupTreeProvider.viewId, groupTreeView);
+    registerCommands(context);
     const { send } = useWSServer();
-    let refreshFriendList = vscode.commands.registerCommand('yukihana.refreshFriendList', async () => {
-        const friendList = await send<{}, FriendGroupItemType[]>('get_friend_list', {});
-        friendTreeView.updateGroupData(friendList);
-        
-    });
-    context.subscriptions.push(refreshFriendList);
     
-    let refreshGroupList = vscode.commands.registerCommand('yukihana.refreshGroupList', async () => {
-        const groupList = await send<{}, GroupDetailInfoResp[]>('get_group_list', {});
-        groupTreeView.updateGroupData(groupList);
-        
-    });
-    context.subscriptions.push(refreshGroupList);
     try {
 
         const info = await send('get_self_info', {});
