@@ -110,10 +110,31 @@ window.vscode = acquireVsCodeApi();
     const msg = event.data; // The JSON data our extension sent
     if (!msg.id) {return;}
     clearTimeout(waitMap[msg.id].timer);
-    waitMap[msg.id].callback(msg);
+    waitMap[msg.id].callback(msg.result);
   });
-  window.sendToMain = async (data) => {
+  window.sendToWSServer = async (data) => {
     data.id = getUuid();
+    data.type = 'websocket';
+    vscode.postMessage(data);
+    return new Promise((resolve, reject) => {
+      const t = setTimeout(() => {
+        delete waitMap[data.id];
+        reject(new Error('timeout'));
+      }, 30000);
+      waitMap[data.id] = {
+        callback: resolve,
+        reject,
+        timer: t,
+      };
+    });
+  };
+  window.sendToMain = async (action, param) => {
+    const data = {
+      id: getUuid(),
+      action,
+      type: 'simple',
+      data: param
+    };
     vscode.postMessage(data);
     return new Promise((resolve, reject) => {
       const t = setTimeout(() => {

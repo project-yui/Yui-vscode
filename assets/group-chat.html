@@ -1,39 +1,49 @@
 <div>
     <style>
         .chat-list {
-            background-color: rgb(61, 58, 58);
+            /* background-color: rgb(61, 58, 58); */
         }
         .chat-list > .chat-item {
-            padding: .5rem;
+            /* padding: .5rem; */
             display: flex;
         }
         .chat-list > .chat-item > .avatar {
             padding: 5px;
+            height: 30px;
+            width: 30px;
+        }
+        .chat-list > .chat-item > .right {
+            width: fit-content;
+            margin: 5px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-list > .chat-item > .right > .name {
+            margin-left: 10px;
+        }
+        .chat-list > .chat-item .content {
+            border-radius: 5px;
+            border: 1px #eee;
+            padding: 10px;
+            background-color: rgb(61, 58, 58);
+            white-space: break-spaces;
+            margin-top: 5px;
+            width: fit-content;
         }
         .chat-list > .self {
             flex-flow: row-reverse;
         }
+        .chat-list > .self > .right {
+            flex-wrap: wrap-reverse;
+        }
+        /*元素渲染*/
+        .chat-list > .chat-item .content .ele-image {
+            max-width: 500px;
+            max-height: 200px;
+        }
     </style>
-    <div class="chat-list">
-        <div class="chat-item">
-            <div class="avatar">
-                头像
-            </div>
-            <div>
-                <span>昵称一</span>
-                <div>群友第一条消息<br/>aaaa<br />222</div>
-            </div>
-        </div>
-        <div class="chat-item">
-            <div class="avatar">
-                头像
-            </div>
-            <div>
-                <span>昵称二</span>
-                <div>群友第二条消息</div>
-            </div>
-        </div>
-        <div class="chat-item self">
+    <div id="chat-list" class="chat-list">
+        <!-- <div class="chat-item self">
             <div class="avatar">
                 头像
             </div>
@@ -41,7 +51,7 @@
                 <span>我的昵称</span>
                 <div>我的消息,121323<br>15454asdafbj</div>
             </div>
-        </div>
+        </div> -->
     </div>
     <br />
     <hr>
@@ -52,4 +62,77 @@
         <textarea></textarea>
         <button>发送</button>
     </div>
+    <script>
+        const renderElementMap = {
+            text: async (data) => {
+                return `<span class="ele-text">${data.text}</span>`
+            },
+            image: async (data) => {
+                if (data.pic.url.startsWith('http'))
+                    return `<img class="ele-image" src="${data.pic.url}" />`
+                const ret = await sendToMain('get_url', {path: data.pic.path})
+                return `<img class="ele-image" src="${ret}" />`
+            }
+        }
+        const renderElement = async (element) => {
+            if (renderElementMap[element.type])
+            {
+                return await renderElementMap[element.type](element.data)
+            }
+            console.warn('不支持的元素类型:', element.type)
+            return ''
+        }
+        const renderMsgItem = async (msg) => {
+            console.log('render msg...')
+            const msgEle = document.createElement('div')
+            msgEle.classList.add('chat-item')
+            if (msg.sender_uid === selfUid)
+            {
+                msgEle.classList.add('self')
+            }
+            let name = msg.sender_member_name
+            if (name.length === 0)
+            {
+                const info = await sendToWSServer({
+                    action: 'get_user_info',
+                    params: {
+                        user_uid: msg.sender_uid,
+                    },
+                })
+                name = info.nick
+            }
+            const { elements } = msg
+            
+            msgEle.innerHTML = `
+            <div class="avatar">
+                <img src="http://q2.qlogo.cn/headimg_dl?dst_uin=${msg.sender_id}&spec=100" />
+            </div>
+            <div class="right">
+                <span class="name">${name}</span>
+                <div class="content">${(await Promise.all(elements.map(async ele => await renderElement(ele)))).join('')}</div>
+            </div>
+            `
+            return msgEle
+        }
+        const addOldMsgToList = async (msgList) => {
+            const list = document.getElementById('chat-list')
+            msgList = msgList.reverse()
+            for (const msg of msgList) {
+                list.prepend(await renderMsgItem(msg))
+            }
+        };
+        (async () => {
+            // 获取群消息
+            const list = await sendToWSServer({
+                action: 'get_group_msg',
+                params: {
+                    code: groupCode,
+                    msg_id: '0',
+                    cnt: 10
+                },
+            })
+            console.log('group msg list:', list)
+            addOldMsgToList(list)
+        })()
+    </script>
 </div>

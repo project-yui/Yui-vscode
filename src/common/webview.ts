@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { useGlobal } from './global';
 
-export const getHtml = (webview: vscode.Webview, page: string) => {
+export const getHtml = (webview: vscode.Webview, page: string, srcipt: string = '') => {
     const { getContext } = useGlobal();
     const ctx = getContext();
     if(ctx === null)
@@ -32,6 +32,7 @@ export const getHtml = (webview: vscode.Webview, page: string) => {
             <title>User Info</title>
         </head>
         <body>
+            <script>${srcipt}</script>
             <div id="container"></div><br />
             <script>
                 window.pageSrc = '${pageSrc}'
