@@ -1,0 +1,13 @@
+.face-emoji {
+    display: flex;
+    flex-direction: column-reverse;
+}
+.face-emoji:hover > .detail-area {
+    display: block;
+}
+.face-emoji > .detail-area {
+    display: block;
+    position: relative;
+    bottom: 4px;
+    left: 10px;
+}

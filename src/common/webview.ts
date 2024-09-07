@@ -12,6 +12,7 @@ export const getHtml = (webview: vscode.Webview, page: string, srcipt: string = 
     // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
     const preload = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, 'assets', 'preload.js'));
     const pageSrc = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, 'assets', page));
+    const baseUrl = webview.asWebviewUri(vscode.Uri.joinPath(ctx.extensionUri, 'assets'));
 
     // Use a nonce to only allow a specific script to be run.
     // const nonce = getNonce();
@@ -30,6 +31,7 @@ export const getHtml = (webview: vscode.Webview, page: string, srcipt: string = 
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
             <title>User Info</title>
+            <base href="${baseUrl}/" />
         </head>
         <body>
             <script>${srcipt}</script>

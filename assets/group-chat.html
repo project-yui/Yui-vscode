@@ -1,8 +1,5 @@
 <div>
     <style>
-        .chat-list {
-            /* background-color: rgb(61, 58, 58); */
-        }
         .chat-list > .chat-item {
             /* padding: .5rem; */
             display: flex;
@@ -41,6 +38,26 @@
             max-width: 500px;
             max-height: 200px;
         }
+        /*编辑区域*/
+        .edit-area {
+            width: 100%;
+            height: 200px;
+            background-color: gray;
+        }
+        .edit-area:focus-visible {
+            outline: none;
+        }
+        .edit-area img{
+            max-height: 100px;
+            max-width: 100px;
+        }
+        .msg-input {
+            position: sticky;
+            bottom: 0;
+            background-color: black;
+            padding: 10px;
+            border-radius: 5px;
+        }
     </style>
     <div id="chat-list" class="chat-list">
         <!-- <div class="chat-item self">
@@ -54,13 +71,17 @@
         </div> -->
     </div>
     <br />
-    <hr>
-    <br />
-    <div>
-        发送区域
+    <div class="msg-input">
+        <!-- 表情 -->
+        <link rel="stylesheet" type="text/css" href="./group-chat.css" />
+        <script src="./group-chat.js"></script>
+        <div class="face-emoji">
+            <span>表情</span>
+            <div class="detail-area">表情区域</div>
+        </div>
         <br />
-        <textarea></textarea>
-        <button>发送</button>
+        <div id="msg-elements" contenteditable="true" class="edit-area"></div>
+        <button id="send-msg">发送</button>
     </div>
     <script>
         const renderElementMap = {
@@ -93,12 +114,9 @@
             let name = msg.sender_member_name
             if (name.length === 0)
             {
-                const info = await sendToWSServer({
-                    action: 'get_user_info',
-                    params: {
+                const info = await sendToWSServer('get_user_info', {
                         user_uid: msg.sender_uid,
-                    },
-                })
+                    })
                 name = info.nick
             }
             const { elements } = msg
@@ -123,16 +141,13 @@
         };
         (async () => {
             // 获取群消息
-            const list = await sendToWSServer({
-                action: 'get_group_msg',
-                params: {
+            const list = await sendToWSServer('get_group_msg', {
                     code: groupCode,
                     msg_id: '0',
                     cnt: 10
-                },
-            })
+                })
             console.log('group msg list:', list)
             addOldMsgToList(list)
-        })()
+        })();
     </script>
 </div>

@@ -112,9 +112,13 @@ window.vscode = acquireVsCodeApi();
     clearTimeout(waitMap[msg.id].timer);
     waitMap[msg.id].callback(msg.result);
   });
-  window.sendToWSServer = async (data) => {
-    data.id = getUuid();
-    data.type = 'websocket';
+  window.sendToWSServer = async (action, param) => {
+    const data = {
+      id: getUuid(),
+      type: 'websocket',
+      action,
+      params: param,
+    };
     vscode.postMessage(data);
     return new Promise((resolve, reject) => {
       const t = setTimeout(() => {
