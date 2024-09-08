@@ -11,13 +11,17 @@ console.log('test....00');
             }];
         },
         'DIV': (element) => {
-            console.log('parse div element...');
+            console.log('parse div element...', element.childNodes);
             const eles = [];
-            for (const ele in element.childNodes)
+            for (const ele of element.childNodes)
             {
                 if (elementParser[ele.nodeName])
                 {
                     eles.push(...elementParser[ele.nodeName](ele));
+                }
+                else
+                {
+                    console.warn('not supported:', ele.nodeName);
                 }
             }
             return eles;
@@ -31,6 +35,16 @@ console.log('test....00');
             if (elementParser[ele.nodeName])
             {
                 eles.push(...elementParser[ele.nodeName](ele));
+                eles.push({
+                    type: 'text',
+                    data: {
+                        text: '\n'
+                    }
+                });
+            }
+            else
+            {
+                console.warn('not supported:', ele.nodeName);
             }
         }
         return eles;
@@ -46,5 +60,75 @@ console.log('test....00');
         });
         const htmls = document.getElementById('msg-elements');
         htmls.innerHTML = '';
+    };
+})();
+(async () => {
+    const htmls = document.getElementById('msg-elements');
+    htmls.onpaste = (event) => {
+         // 阻止默认粘贴行为
+        event.preventDefault();
+
+        // 获取剪贴板中的文本内容
+        const clipboard = (event.clipboardData || window.clipboardData);
+        const clipboardData = clipboard.getData('text/html');
+        console.log('clipboardData:', clipboardData);
+        // 对粘贴的内容进行修改，例如将所有字母转换为大写
+        const modifiedData = clipboardData.replace(/\r|\n/g, '');
+
+        // 获取当前的光标位置
+        const selection = window.getSelection();
+        if (!selection.rangeCount) {return;}
+
+        // 创建一个新的文本节点，插入修改后的内容
+        selection.deleteFromDocument(); // 删除当前选中的内容
+        let data = modifiedData.match(/<!--StartFragment --><DIV>([\s\S]+)<\/DIV><!--EndFragment-->/);
+        if (data === null)
+        {
+            console.log('math with second regex');
+            data = modifiedData.match(/<!--StartFragment -->([\s\S]+)<!--EndFragment-->/);
+        }
+        if (data !== null && data.length > 1)
+        {
+            data = data[1];
+        }
+        else
+        {
+            data = modifiedData;
+        }
+        data = data.replace(/<br>/g, '<div><br></div>');
+        console.log('html:', data);
+        const t = document.createElement('div');
+        t.innerHTML = data;
+        console.log('t:', t);
+        let list = t.childNodes;
+        if (list.length === 1 && list[0].nodeName === 'DIV')
+        {
+            list = list[0].childNodes;
+        }
+        const temp = document.createElement('div');
+        temp.classList.add('temp');
+        console.log('list:', list, list.length);
+        const last = list[list.length - 1];
+        for (let i=list.length - 1; i >= 0; i--)
+        {
+            console.log('current ele:', list[i], list.length);
+            
+            // temp.append(list[i]);
+            selection.getRangeAt(0).insertNode(list[i]);
+        }
+        // temp.remove();
+        if (window.getSelection) {//ie11 10 9 ff safari
+            // obj.focus(); //解决ff不获取焦点无法定位问题
+            var range = window.getSelection();//创建range
+            range.selectAllChildren(last);//range 选择obj下所有子内容
+            range.collapseToEnd();//光标移至最后
+        }
+        else if (document.selection) {//ie10 9 8 7 6 5
+            var range = document.selection.createRange();//创建选择对象
+            //var range = document.body.createTextRange();
+            range.moveToElementText(last);//range定位到obj
+            range.collapse(false);//光标移至最后
+            range.select();
+        }
     };
 })();
