@@ -70,7 +70,16 @@ console.log('test....00');
 
         // 获取剪贴板中的文本内容
         const clipboard = (event.clipboardData || window.clipboardData);
-        const clipboardData = clipboard.getData('text/html');
+        let clipboardData = clipboard.getData('text/html');
+        if (!clipboardData)
+        {
+            clipboardData = clipboard.getData('text');
+        }
+        if (!clipboardData)
+        {
+            console.warn('clipboard empty!');
+            return;
+        }
         console.log('clipboardData:', clipboardData);
         // 对粘贴的内容进行修改，例如将所有字母转换为大写
         const modifiedData = clipboardData.replace(/\r|\n/g, '');
@@ -108,6 +117,14 @@ console.log('test....00');
         const temp = document.createElement('div');
         temp.classList.add('temp');
         console.log('list:', list, list.length);
+        for(const ele of list)
+        {
+            const l = ['STYLE'];
+            if (l.includes(ele.nodeName))
+            {
+                ele.remove();
+            }
+        }
         const last = list[list.length - 1];
         for (let i=list.length - 1; i >= 0; i--)
         {
@@ -116,14 +133,16 @@ console.log('test....00');
             // temp.append(list[i]);
             selection.getRangeAt(0).insertNode(list[i]);
         }
-        // temp.remove();
+        console.log('last:', last);
         if (window.getSelection) {//ie11 10 9 ff safari
-            // obj.focus(); //解决ff不获取焦点无法定位问题
+            console.log('window.getSelection');
+            last.focus?.(); //解决ff不获取焦点无法定位问题
             var range = window.getSelection();//创建range
-            range.selectAllChildren(last);//range 选择obj下所有子内容
+            // range.selectAllChildren(last);//range 选择obj下所有子内容
             range.collapseToEnd();//光标移至最后
         }
         else if (document.selection) {//ie10 9 8 7 6 5
+            console.log('document.selection');
             var range = document.selection.createRange();//创建选择对象
             //var range = document.body.createTextRange();
             range.moveToElementText(last);//range定位到obj
