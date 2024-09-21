@@ -20,7 +20,7 @@ export class FriendTreeProvider implements vscode.TreeDataProvider<FriendItem> {
         log.info('get children:', element);
         if (element) {
             const group = this.friendList.find(e => `${e.id}` === element.id);
-            const ret = group?.friend_list.map(e => new FriendItem(e.uin, e.nick, e.remark, e.avatar_url, vscode.TreeItemCollapsibleState.None));
+            const ret = group?.friend_list.map(e => new FriendItem(e.uin, e.nick, e.remark, e.avatarUrl, vscode.TreeItemCollapsibleState.None));
             
             return Promise.resolve(ret || []);
         }

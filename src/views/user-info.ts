@@ -42,7 +42,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
     
         const update = (resp: EventDataType<any>) => {
             log.info('qrcode error:', resp);
-            switch (resp.detail_type) {
+            switch (resp.detailType) {
                 case 'qrcode_error':
                     webviewView.webview.postMessage({ command: 'timeout' });
                     break;

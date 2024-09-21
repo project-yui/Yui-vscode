@@ -57,7 +57,7 @@ export interface EventDataType<T> {
     /**
      * 事件详细类型
      */
-    detail_type: string
+    detailType: string
     /**
      * 事件子类型（详细类型的下一级类型）
      */

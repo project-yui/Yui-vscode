@@ -57,7 +57,7 @@ export const scanLoginCommand = async () => {
 
     const update = (resp: EventDataType<any>) => {
         log.info('qrcode error:', resp);
-        switch (resp.detail_type) {
+        switch (resp.detailType) {
             case 'qrcode_error':
                 panel.webview.postMessage({ command: 'timeout' });
                 break;
@@ -65,7 +65,7 @@ export const scanLoginCommand = async () => {
                 panel.webview.postMessage({
                     command: 'scaned',
                     data: {
-                        avatarUrl: resp.data.avatar_url
+                        avatarUrl: resp.data.avatarUrl
                     },
                 });
                 break;

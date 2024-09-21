@@ -30,7 +30,7 @@ export const openGroup = async (groupCode: `${number}`) => {
     );
     const { send } = useWSServer();
     const self = await send<any, any>('get_self_info', {});
-    panel.webview.html = getHtml(panel.webview, 'group-chat.html', `window.groupCode = ${groupCode};\nwindow.selfUid = '${self.user_uid}';\nwindow.selfUin = '${self.user_uin}';`);
+    panel.webview.html = getHtml(panel.webview, 'group-chat.html', `window.groupCode = ${groupCode};\nwindow.selfUid = '${self.userUid}';\nwindow.selfUin = '${self.userUin}';`);
     panel.webview.onDidReceiveMessage(async (req) => {
         log.info('receive from html:', req);
         if (req.type === 'websocket')

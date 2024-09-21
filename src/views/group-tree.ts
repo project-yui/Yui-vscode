@@ -75,10 +75,10 @@ export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
                     id: `${i++}`,
                     code: group.code,
                     name: group.name,
-                    avatarUrl: group.avatar_url,
+                    avatarUrl: group.avatarUrl,
                     role: group.role,
                     top: group.top,
-                    toppedTimestamp: group.topped_timestamp,
+                    toppedTimestamp: group.toppedTimestamp,
                 };
                 topGroup.groupList.push(g);
             }
@@ -88,10 +88,10 @@ export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
                     id: `${i++}`,
                     code: group.code,
                     name: group.name,
-                    avatarUrl: group.avatar_url,
+                    avatarUrl: group.avatarUrl,
                     role: group.role,
                     top: group.top,
-                    toppedTimestamp: group.topped_timestamp,
+                    toppedTimestamp: group.toppedTimestamp,
                 };
                 unnameGroup.groupList.push(g);
             }
@@ -99,10 +99,10 @@ export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
                 id: `${i++}`,
                 code: group.code,
                 name: group.name,
-                avatarUrl: group.avatar_url,
+                avatarUrl: group.avatarUrl,
                 role: group.role,
                 top: group.top,
-                toppedTimestamp: group.topped_timestamp,
+                toppedTimestamp: group.toppedTimestamp,
             };
             if (g.role === 'manager')
             {

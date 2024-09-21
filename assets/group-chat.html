@@ -107,15 +107,15 @@
             console.log('render msg...')
             const msgEle = document.createElement('div')
             msgEle.classList.add('chat-item')
-            if (msg.sender_uid === selfUid)
+            if (msg.senderUid === selfUid)
             {
                 msgEle.classList.add('self')
             }
-            let name = msg.sender_member_name
+            let name = msg.senderMemberName
             if (name.length === 0)
             {
                 const info = await sendToWSServer('get_user_info', {
-                        user_uid: msg.sender_uid,
+                        userUid: msg.senderUid,
                     })
                 name = info.nick
             }
@@ -123,7 +123,7 @@
             
             msgEle.innerHTML = `
             <div class="avatar">
-                <img src="http://q2.qlogo.cn/headimg_dl?dst_uin=${msg.sender_id}&spec=100" />
+                <img src="http://q2.qlogo.cn/headimg_dl?dst_uin=${msg.senderId}&spec=100" />
             </div>
             <div class="right">
                 <span class="name">${name}</span>
@@ -141,9 +141,10 @@
         };
         (async () => {
             // 获取群消息
+            console.log('start to get group msg')
             const list = await sendToWSServer('get_group_msg', {
                     code: groupCode,
-                    msg_id: '0',
+                    msgId: '0',
                     cnt: 10
                 })
             console.log('group msg list:', list)

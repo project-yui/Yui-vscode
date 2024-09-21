@@ -34,7 +34,7 @@ export interface FriendItemType {
     uin: `${number}`,
     nick: string
     remark: string
-    avatar_url: string
+    avatarUrl: string
 }
 export interface GroupGroupItemType {
     id: number
@@ -61,9 +61,9 @@ export interface GroupItemType {
 export interface GroupDetailInfoResp {
     code: `${number}`
     name: string
-    avatar_url: string
+    avatarUrl: string
     role: 'owner' | 'member' | 'manager'
     top: boolean
-    topped_timestamp: number
+    toppedTimestamp: number
     is_conf: boolean
 }

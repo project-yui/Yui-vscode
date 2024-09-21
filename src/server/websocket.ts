@@ -3,6 +3,7 @@ import { BotActionRequest, BotActionResponse } from './types';
 import { randomUUID } from 'crypto';
 import EventEmitter from 'events';
 import { useLogger } from '../common/log';
+import { convertToCamelCase, convertToSnakeCase } from '../common/convert';
 
 const log = useLogger('WebSocket');
 let server: WebSocket | undefined = undefined;
@@ -38,10 +39,11 @@ const eventHandle = new EventEmitter();
 const receive = (data: WebSocket.RawData) => {
     log.info('receive:', data.toString());
     let resp = JSON.parse(data.toString());
+    resp = convertToCamelCase(resp);
     if (!resp.id)
     {
         // event
-        eventHandle.emit(resp.detail_type, resp);
+        eventHandle.emit(resp.detailType, resp);
         return;
     }
     if (!waitMap[resp.id]) {return;}
@@ -104,6 +106,7 @@ const send = async <Req, Resp>(action: string, params: Req) => {
             reject,
             timer: t,
         };
+        req = convertToSnakeCase(req);
         server?.send(JSON.stringify(req));
     });
 };
