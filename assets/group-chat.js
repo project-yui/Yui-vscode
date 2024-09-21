@@ -10,6 +10,31 @@ console.log('test....00');
                 }
             }];
         },
+        'BR': (element) => {
+            console.log('parse br element...');
+            return [{
+                type: 'text',
+                data: {
+                    text: '\n'
+                }
+            }];
+        },
+        'SPAN': (element) => {
+            console.log('parse span element...', element.childNodes);
+            const eles = [];
+            for (const ele of element.childNodes)
+            {
+                if (elementParser[ele.nodeName])
+                {
+                    eles.push(...elementParser[ele.nodeName](ele));
+                }
+                else
+                {
+                    console.warn('not supported:', ele.nodeName);
+                }
+            }
+            return eles;
+        },
         'DIV': (element) => {
             console.log('parse div element...', element.childNodes);
             const eles = [];
@@ -24,6 +49,12 @@ console.log('test....00');
                     console.warn('not supported:', ele.nodeName);
                 }
             }
+            eles.push({
+                type: 'text',
+                data: {
+                    text: '\n'
+                }
+            });
             return eles;
         }
     };
@@ -35,12 +66,6 @@ console.log('test....00');
             if (elementParser[ele.nodeName])
             {
                 eles.push(...elementParser[ele.nodeName](ele));
-                eles.push({
-                    type: 'text',
-                    data: {
-                        text: '\n'
-                    }
-                });
             }
             else
             {
@@ -64,25 +89,40 @@ console.log('test....00');
 })();
 (async () => {
     const htmls = document.getElementById('msg-elements');
-    htmls.onpaste = (event) => {
+    const renderElementMap = {
+        text: async (data) => {
+            data.text = data.text.replace(/ /g, '&nbsp;');
+            data.text = data.text.replace(/\r\n/g, '\n');
+            data.text = data.text.replace(/\n/g, '</span><br /><span class="ele-text">');
+            return `<span class="ele-text">${data.text}</span>`.replace('<span class="ele-text"></span>', '');
+        },
+        image: async (data) => {
+            if (data.pic.url && data.pic.url.startsWith('http'))
+            {
+                return `<img class="ele-image" src="${data.pic.url}" />`;
+            }
+            const ret = await sendToMain('get_url', {path: data.pic.path});
+            return `<img class="ele-image" src="${ret}" />`;
+        }
+    };
+    const renderElement = async (element) => {
+        if (renderElementMap[element.type])
+        {
+            return await renderElementMap[element.type](element.data);
+        }
+        console.warn('不支持的元素类型:', element.type);
+        return '';
+    };
+    htmls.onpaste = async (event) => {
          // 阻止默认粘贴行为
         event.preventDefault();
-
-        // 获取剪贴板中的文本内容
         const clipboard = (event.clipboardData || window.clipboardData);
         let clipboardData = clipboard.getData('text/html');
         if (!clipboardData)
         {
             clipboardData = clipboard.getData('text');
         }
-        if (!clipboardData)
-        {
-            console.warn('clipboard empty!');
-            return;
-        }
-        console.log('clipboardData:', clipboardData);
-        // 对粘贴的内容进行修改，例如将所有字母转换为大写
-        const modifiedData = clipboardData.replace(/\r|\n/g, '');
+        const msgs = await sendToWSServer('get_clipboard_msg', {});
 
         // 获取当前的光标位置
         const selection = window.getSelection();
@@ -90,21 +130,44 @@ console.log('test....00');
 
         // 创建一个新的文本节点，插入修改后的内容
         selection.deleteFromDocument(); // 删除当前选中的内容
-        let data = modifiedData.match(/<!--StartFragment --><DIV>([\s\S]+)<\/DIV><!--EndFragment-->/);
-        if (data === null)
-        {
-            console.log('math with second regex');
-            data = modifiedData.match(/<!--StartFragment -->([\s\S]+)<!--EndFragment-->/);
-        }
-        if (data !== null && data.length > 1)
-        {
-            data = data[1];
+
+        console.log('clipboard msg:', msgs);
+        let data = '';
+        if (msgs.length > 0) {
+            // 合成html
+            console.log('使用NTQQ的消息元素合成');
+            data = (await Promise.all(msgs.map(async e => await renderElement(e)))).join('');
         }
         else
         {
-            data = modifiedData;
+            console.log('使用剪贴板的html数据合成');
+            // 获取剪贴板中的文本内容
+            if (!clipboardData)
+            {
+                console.warn('clipboard empty!');
+                return;
+            }
+            console.log('clipboardData:', clipboardData);
+            // 对粘贴的内容进行修改，例如将所有字母转换为大写
+            const modifiedData = clipboardData.replace(/\r|\n/g, '');
+
+            data = modifiedData.match(/<!--StartFragment --><DIV>([\s\S]+)<\/DIV><!--EndFragment-->/);
+            if (data === null)
+            {
+                console.log('math with second regex');
+                data = modifiedData.match(/<!--StartFragment -->([\s\S]+)<!--EndFragment-->/);
+            }
+            if (data !== null && data.length > 1)
+            {
+                data = data[1];
+            }
+            else
+            {
+                data = modifiedData;
+            }
+            data = data.replace(/<br>/g, '<div><br></div>');
         }
-        data = data.replace(/<br>/g, '<div><br></div>');
+
         console.log('html:', data);
         const t = document.createElement('div');
         t.innerHTML = data;
@@ -119,7 +182,7 @@ console.log('test....00');
         console.log('list:', list, list.length);
         for(const ele of list)
         {
-            const l = ['STYLE'];
+            const l = ['STYLE', '#comment'];
             if (l.includes(ele.nodeName))
             {
                 ele.remove();
