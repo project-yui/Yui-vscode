@@ -1,4 +1,96 @@
 console.log('test....00');
+class MsgRender {
+    constructor(msg)
+    {
+        this.msg = msg;
+    }
+    async text (data) {
+        let text = '<span class="ele-text">';
+        for (let i=0; i < data.text.length; i++)
+        {
+            const cur = data.text[i];
+            if (cur === '\n')
+            {
+                text += '</span><br /><span class="ele-text">';
+            }
+            else
+            {
+                text += cur;
+            }
+        }
+        return `${text}</span>`;
+    }
+    async image (data) {
+        if (data.pic.url.startsWith('http'))
+        {
+            return `<img class="ele-image" src="${data.pic.url}" />`;
+        }
+        const ret = await sendToMain('get_url', {path: data.pic.path});
+        return `<img class="ele-image" src="${ret}" />`;
+    }
+    async reply (data) {
+        const srcMsg = this.msg.records.find(e => e.Id === data.srcMsgId);
+        if (!srcMsg)
+        {
+            return `<div class="ele-reply">消息不存在！</div>`;
+        }
+        const render = new MsgRender(srcMsg);
+        const srcHtml = await render.renderElements();
+        // const srcHtml = '';
+        return `<div class="ele-reply"><a href="#${srcMsg.messageSeq}"><div>${srcHtml}</div></a></div>`;
+    }
+    async renderElement(element)
+    {
+        if (this[element.type])
+        {
+            return await this[element.type](element.data);
+        }
+        console.warn('不支持的元素类型:', element.type);
+        return '';
+    }
+    async renderElements()
+    {
+        const eles = (await Promise.all(this.msg.elements.map(async ele => await this.renderElement(ele))));
+        for (let i = 1; i < eles.length; i++) {
+            const preHtml = eles[i - 1];
+            const curHtml = eles[i];
+            if (preHtml.startsWith('<img') && curHtml.startsWith('<span') && !(curHtml.startsWith('<span class="ele-text">\r') || curHtml.startsWith('<span class="ele-text">\n')))
+            {
+                eles[i] = `<br />${eles[i]}`;
+            }
+        }
+        return eles.join('');
+    }
+    async renderMsgItem () {
+        console.log('render msg...');
+        const msg = this.msg;
+        const msgEle = document.createElement('div');
+        msgEle.classList.add('chat-item');
+        if (msg.senderUid === selfUid)
+        {
+            msgEle.classList.add('self');
+        }
+        let name = msg.senderMemberName;
+        if (name.length === 0)
+        {
+            const info = await sendToWSServer('get_user_info', {
+                    userUid: msg.senderUid,
+                });
+            name = info.nick;
+        }
+        msgEle.id = msg.messageSeq;
+        msgEle.innerHTML = `
+        <div class="avatar">
+            <img src="http://q2.qlogo.cn/headimg_dl?dst_uin=${msg.senderId}&spec=100" />
+        </div>
+        <div class="right">
+            <span class="name">${name}</span>
+            <div class="content">${await this.renderElements()}</div>
+        </div>
+        `;
+        return msgEle;
+    }
+};
 (async () => {
     const elementParser = {
         '#text': (element) => {
@@ -213,4 +305,40 @@ console.log('test....00');
             range.select();
         }
     };
+})();
+const addOldMsgToList = async (msgList) => {
+    const list = document.getElementById('chat-list');
+    // msgList = msgList.reverse();
+    let preMsg = {
+        time: 0
+    };
+    for (let i=0; i<msgList.length; i++) {
+        const curMsg = msgList[i];
+        if (curMsg.time - preMsg.time > 60 * 5)
+        {
+            // 添加时间条，当前时间为准
+            
+            const time = new Date(curMsg.time * 1000);
+            const timeEle = document.createElement('div');
+            timeEle.classList.add('chat-time');
+            timeEle.textContent = `${time.getFullYear()}/${time.getMonth()}/${time.getDate()} ${(time.getHours() + '').padStart(2, '0')}:${(time.getMinutes() + '').padStart(2, '0')}:${(time.getSeconds() + '').padStart(2, '0')}`;
+            list.append(timeEle);
+        }
+        preMsg = curMsg;
+        const render = new MsgRender(curMsg);
+        list.append(await render.renderMsgItem());
+        
+    }
+    document.scrollingElement.scrollTop = document.scrollingElement.scrollHeight;
+};
+(async () => {
+    // 获取群消息
+    console.log('start to get group msg');
+    const list = await sendToWSServer('get_group_msg', {
+            code: groupCode,
+            msgId: '0',
+            cnt: 10
+        });
+    console.log('group msg list:', list);
+    addOldMsgToList(list);
 })();

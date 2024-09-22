@@ -1,5 +1,11 @@
 <div>
     <style>
+        .chat-list > .chat-time {
+            /* padding: .5rem; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         .chat-list > .chat-item {
             /* padding: .5rem; */
             display: flex;
@@ -37,6 +43,27 @@
         .chat-list > .chat-item .content .ele-image {
             max-width: 500px;
             max-height: 200px;
+        }
+        /* .chat-list > .chat-item .content .ele-image + .ele-text::before {
+            content: "\A";
+            white-space: pre;
+        }
+        .chat-list > .chat-item .content .ele-image + .ele-text {
+            display: inline;
+        } */
+        .chat-list > .chat-item .content .ele-reply {
+            background-color: gray;
+            border-radius: 3px;
+            padding: 6px;
+            user-select: none;
+            cursor: pointer;
+        }
+        .chat-list > .chat-item .content .ele-reply > a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .chat-list > .chat-item .content .ele-reply > a:focus {
+            outline: none;
         }
         /*编辑区域*/
         .edit-area {
@@ -84,72 +111,4 @@
         <button id="send-msg">发送</button>
     </div>
     <script src="./group-chat.js"></script>
-    <script>
-        const renderElementMap = {
-            text: async (data) => {
-                return `<span class="ele-text">${data.text}</span>`
-            },
-            image: async (data) => {
-                if (data.pic.url.startsWith('http'))
-                    return `<img class="ele-image" src="${data.pic.url}" />`
-                const ret = await sendToMain('get_url', {path: data.pic.path})
-                return `<img class="ele-image" src="${ret}" />`
-            }
-        }
-        const renderElement = async (element) => {
-            if (renderElementMap[element.type])
-            {
-                return await renderElementMap[element.type](element.data)
-            }
-            console.warn('不支持的元素类型:', element.type)
-            return ''
-        }
-        const renderMsgItem = async (msg) => {
-            console.log('render msg...')
-            const msgEle = document.createElement('div')
-            msgEle.classList.add('chat-item')
-            if (msg.senderUid === selfUid)
-            {
-                msgEle.classList.add('self')
-            }
-            let name = msg.senderMemberName
-            if (name.length === 0)
-            {
-                const info = await sendToWSServer('get_user_info', {
-                        userUid: msg.senderUid,
-                    })
-                name = info.nick
-            }
-            const { elements } = msg
-            
-            msgEle.innerHTML = `
-            <div class="avatar">
-                <img src="http://q2.qlogo.cn/headimg_dl?dst_uin=${msg.senderId}&spec=100" />
-            </div>
-            <div class="right">
-                <span class="name">${name}</span>
-                <div class="content">${(await Promise.all(elements.map(async ele => await renderElement(ele)))).join('')}</div>
-            </div>
-            `
-            return msgEle
-        }
-        const addOldMsgToList = async (msgList) => {
-            const list = document.getElementById('chat-list')
-            msgList = msgList.reverse()
-            for (const msg of msgList) {
-                list.prepend(await renderMsgItem(msg))
-            }
-        };
-        (async () => {
-            // 获取群消息
-            console.log('start to get group msg')
-            const list = await sendToWSServer('get_group_msg', {
-                    code: groupCode,
-                    msgId: '0',
-                    cnt: 10
-                })
-            console.log('group msg list:', list)
-            addOldMsgToList(list)
-        })();
-    </script>
 </div>
