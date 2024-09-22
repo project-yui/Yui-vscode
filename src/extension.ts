@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import { install } from './common/install';
 import { ChildProcessWithoutNullStreams } from 'child_process';
-import path from 'path';
+import path, { resolve } from 'path';
 import { existsSync, rmSync } from 'fs';
 import { useGlobal } from './common/global';
 import { useLogger } from './common/log';
@@ -48,8 +48,9 @@ export function activate(context: vscode.ExtensionContext) {
 				await install();
 				await context.globalState.update('yukihana.install', true);
 				vscode.window.showInformationMessage('Install successful!');
+				console.log(context.globalState.get<boolean>('yukihana.install'));
 			} catch (error) {
-				console.log(error);
+				console.error(error);
 			};
 		});
 
@@ -110,6 +111,11 @@ export function activate(context: vscode.ExtensionContext) {
 		context.subscriptions.push(installCommand);
 	}
 	{
+		if (!existsSync(resolve(__dirname, 'program')))
+		{
+			console.log('set not install.');
+			context.globalState.update('yukihana.install', false);
+		}
 		if (!context.globalState.get<boolean>('yukihana.install'))
 		{
 			// 未安装

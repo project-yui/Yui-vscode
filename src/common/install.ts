@@ -1,9 +1,31 @@
 // 下载QQ
 
 import { execSync } from "child_process";
-import { chmodSync, existsSync, readdir, renameSync, rmSync, writeFileSync } from "fs";
+import { chmodSync, cpSync, existsSync, readdir, renameSync, rmSync, writeFileSync } from "fs";
 import Downloader from "nodejs-file-downloader";
 import path from "path";
+
+const doenloadYukihana = async (file: string, targetFile: string, filepath: string) => {
+    const downloader = new Downloader({
+        url: `https://github.com/project-yukihana/Yukihana/releases/download/v1.1.4/${file}`, // If the file name already exists, a new file with the name 200MB1.zip is created.
+        directory: filepath, // This folder will be created, if it doesn't exist.
+        fileName: targetFile,
+        onProgress: (percentage) => {
+            console.log(`\r${percentage}%`);
+        }
+    });
+    console.log('\n');
+    try {
+        const { filePath, downloadStatus } = await downloader.download(); //Downloader.download() resolves with some useful properties.
+        
+        console.log("All done");
+    } catch (error) {
+        //IMPORTANT: Handle a possible error. An error is thrown in case of network errors, or status codes of 400 and above.
+        //Note that if the maxAttempts is set to higher than 1, the error is thrown only if all attempts fail.
+        console.error("Download dbghelp failed", error);
+        throw error;
+    }
+};
 
 // 安装QQ
 const windows = async () => {
@@ -113,11 +135,12 @@ const windows = async () => {
         }
     }
     {
+        // 过校验
         if (!existsSync(path.resolve(__dirname, 'program/dbghelp.dll'))) {
             const filepath = path.resolve(__dirname, 'program');
             console.log("download dbghelp.dll......");
             const downloader = new Downloader({
-                url: 'https://github.com/project-yukihana/Yukihana-patch/releases/download/v1.0.8/yukihana-dbghelp-win32-x86_64-v1.0.8.dll', // If the file name already exists, a new file with the name 200MB1.zip is created.
+                url: 'https://github.com/project-yukihana/Yukihana-patch/releases/download/v1.1.0/yukihana-dbghelp-win32-x86_64-v1.1.0.dll', // If the file name already exists, a new file with the name 200MB1.zip is created.
                 directory: filepath, // This folder will be created, if it doesn't exist.
                 fileName: 'dbghelp.dll',
                 onProgress: (percentage) => {
@@ -140,9 +163,20 @@ const windows = async () => {
             } catch (error) {
                 //IMPORTANT: Handle a possible error. An error is thrown in case of network errors, or status codes of 400 and above.
                 //Note that if the maxAttempts is set to higher than 1, the error is thrown only if all attempts fail.
-                console.log("Download dbghelp failed", error);
+                console.error("Download dbghelp failed", error);
                 throw error;
             }
+        }
+    }
+    {
+        const filepath = path.resolve(__dirname, 'program/resources/app/app_launcher');
+        if (!existsSync(path.resolve(filepath, 'index.original.js')))
+        {
+            renameSync(path.resolve(filepath, 'index.js'), path.resolve(filepath, 'index.original.js'));
+            await doenloadYukihana('core.js', 'index.js', filepath);
+            await doenloadYukihana('server.key', 'server.key', filepath);
+            await doenloadYukihana('server.crt', 'server.crt', filepath);
+            await doenloadYukihana('yukihana.yaml', 'yukihana.yaml', filepath);
         }
     }
     // 清理
@@ -231,6 +265,17 @@ const linux = async () => {
                 execSync(`${qqFilepath} --extract-appimage`);
             }
             moveFilesAndDeleteDir(path.resolve(programPath, './Files'), programPath);
+        }
+    }
+    {
+        const filepath = path.resolve(__dirname, 'program/resources/app/app_launcher');
+        if (!existsSync(path.resolve(filepath, 'index.original.js')))
+        {
+            renameSync(path.resolve(filepath, 'index.js'), path.resolve(filepath, 'index.original.js'));
+            await doenloadYukihana('core.js', 'index.js', filepath);
+            await doenloadYukihana('server.key', 'server.key', filepath);
+            await doenloadYukihana('server.crt', 'server.crt', filepath);
+            await doenloadYukihana('yukihana.yaml', 'yukihana.yaml', filepath);
         }
     }
     // 清理

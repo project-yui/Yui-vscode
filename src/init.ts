@@ -30,7 +30,8 @@ export const init = async (context: vscode.ExtensionContext) => {
         const info = await send('get_self_info', {});
         log.info('user info:', info);
         userInfoView.changePage('user-info.html');
-
+        vscode.commands.executeCommand('yukihana.refreshFriendList');
+        vscode.commands.executeCommand('yukihana.refreshGroupList');
     }
     catch(err) {
 

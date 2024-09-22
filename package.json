@@ -19,9 +19,9 @@
         "description": "A sample walkthrough",
         "steps": [
           {
-            "id": "runcommand",
-            "title": "Run Command",
-            "description": "This step will run a command and check off once it has been run.\n[Run Command](command:yukihana.install)",
+            "id": "install-ntqq",
+            "title": "Install NTQQ",
+            "description": "This step will run a command and check off once it has been run.\n[Install](command:yukihana.install)",
             "media": {
               "image": "media/image.png",
               "altText": "Empty image"
@@ -31,14 +31,15 @@
             ]
           },
           {
-            "id": "changesetting",
-            "title": "Change Setting",
-            "description": "This step will change a setting and check off when the setting has changed\n[Change Setting](command:getting-started-sample.changeSetting)",
+            "id": "start-ntqq",
+            "title": "Start NTQQ",
+            "description": "This step will change a setting and check off when the setting has changed\n[Start](command:yukihana.start)",
             "media": {
-              "markdown": "media/markdown.md"
+              "image": "media/image.png",
+              "altText": "Empty image"
             },
             "completionEvents": [
-              "onSettingChanged:getting-started-sample.sampleSetting"
+              "onCommand:yukihana.start"
             ]
           }
         ]

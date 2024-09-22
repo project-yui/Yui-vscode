@@ -57,10 +57,18 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
                 case 'qrcode_userLogged':
                     vscode.window.showWarningMessage(`${resp.data.uin} 已经是登录状态，不能重复登录！`);
                     this.jump('user-info.html');
+                    setTimeout(() => {
+                        vscode.commands.executeCommand('yukihana.refreshFriendList');
+                        vscode.commands.executeCommand('yukihana.refreshGroupList');
+                    }, 1000);
                     break;
                 case 'qrcode_success':
                     vscode.window.showInformationMessage(`${resp.data.uin} 登录成功！`);
                     this.jump('user-info.html');
+                    setTimeout(() => {
+                        vscode.commands.executeCommand('yukihana.refreshFriendList');
+                        vscode.commands.executeCommand('yukihana.refreshGroupList');
+                    }, 1000);
                     break;
                 default:
                     break;
