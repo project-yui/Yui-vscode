@@ -67,6 +67,11 @@
         "title": "Yukihan: Stop"
       },
       {
+        "command": "yukihana.refreshUserInfo",
+        "title": "Yukihan: Refresh User Info",
+        "icon": "$(extensions-refresh)"
+      },
+      {
         "command": "yukihana.refreshFriendList",
         "title": "Yukihan: Refresh Friend List",
         "icon": "$(extensions-refresh)"
@@ -112,6 +117,11 @@
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "yukihana.refreshUserInfo",
+          "when": "view == yukihana.userInfoView",
+          "group": "navigation"
+        },
         {
           "command": "yukihana.refreshFriendList",
           "when": "view == yukihana.friendTreeView",

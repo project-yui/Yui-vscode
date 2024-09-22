@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { loginCommand, scanLoginCommand } from "./login";
 import { installNTQQ } from "./install";
 import { openGroup } from "./group";
+import { UserInfoViewProvider } from "../views/user-info";
     
 const { getView } = useGlobal();
 const { send } = useWSServer();
@@ -23,6 +24,11 @@ const commands: Record<string, (...args: any[]) => any> = {
     'yukihana.refreshFriendList': async () => {
         const friendList = await send<{}, FriendGroupItemType[]>('get_friend_list', {});
         getView<FriendTreeProvider>(FriendTreeProvider.viewId)?.updateGroupData(friendList);
+        
+    },
+    'yukihana.refreshUserInfo': async () => {
+        const friendList = await send<{}, FriendGroupItemType[]>('get_friend_list', {});
+        getView<UserInfoViewProvider>(UserInfoViewProvider.viewId)?.changePage('user-info.html');
         
     },
 };

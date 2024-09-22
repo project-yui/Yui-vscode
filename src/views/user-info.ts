@@ -60,7 +60,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
                     setTimeout(() => {
                         vscode.commands.executeCommand('yukihana.refreshFriendList');
                         vscode.commands.executeCommand('yukihana.refreshGroupList');
-                    }, 1000);
+                    }, 3000);
                     break;
                 case 'qrcode_success':
                     vscode.window.showInformationMessage(`${resp.data.uin} 登录成功！`);
@@ -68,7 +68,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
                     setTimeout(() => {
                         vscode.commands.executeCommand('yukihana.refreshFriendList');
                         vscode.commands.executeCommand('yukihana.refreshGroupList');
-                    }, 1000);
+                    }, 3000);
                     break;
                 default:
                     break;

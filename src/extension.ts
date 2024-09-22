@@ -60,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let installCommand = vscode.commands.registerCommand('yukihana.start', async () => {
 			// The code you place here will be executed every time your command is executed
 			// Display a message box to the user
-			if (qqProcess !== null)
+			if (qqProcess !== null && qqProcess.exitCode === null)
 			{
 				vscode.window.showInformationMessage('已经启动了...');
 				return;
@@ -90,6 +90,9 @@ export function activate(context: vscode.ExtensionContext) {
 				},
 				detached: true,
 				cwd: path.resolve(__dirname, './program'),
+			});
+			qqProcess?.on('exit', (code, signal) => {
+				qqProcess = null;
 			});
 		});
 
