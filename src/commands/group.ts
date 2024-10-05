@@ -5,7 +5,7 @@ import { useWSServer } from "../server/websocket";
 import { useGlobal } from "../common/global";
 
 const log = useLogger('Command Group');
-export const openGroup = async (groupCode: `${number}`) => {
+export const openGroup = async (uin: `${number}`, groupCode: `${number}`) => {
     log.info('open:', groupCode);
     const { getContext } = useGlobal();
     const ctx = getContext();
@@ -29,13 +29,13 @@ export const openGroup = async (groupCode: `${number}`) => {
         } // Webview options. More on these later.
     );
     const { send } = useWSServer();
-    const self = await send<any, any>('get_self_info', {});
+    const self = await send<any, any>(uin, 'get_self_info', {});
     panel.webview.html = getHtml(panel.webview, 'group-chat.html', `window.groupCode = ${groupCode};\nwindow.selfUid = '${self.userUid}';\nwindow.selfUin = '${self.userUin}';`);
     panel.webview.onDidReceiveMessage(async (req) => {
         log.info('receive from html:', req);
         if (req.type === 'websocket')
         {
-            const result = await send<any, any>(req.action, req.params);
+            const result = await send<any, any>(uin, req.action, req.params);
             panel.webview.postMessage({
                 id: req.id,
                 result,

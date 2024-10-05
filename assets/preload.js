@@ -112,9 +112,10 @@ window.vscode = acquireVsCodeApi();
     clearTimeout(waitMap[msg.id].timer);
     waitMap[msg.id].callback(msg.result);
   });
-  window.sendToWSServer = async (action, param) => {
+  window.sendToWSServer = async (uin, action, param) => {
     const data = {
       id: getUuid(),
+      uin,
       type: 'websocket',
       action,
       params: param,
@@ -135,6 +136,9 @@ window.vscode = acquireVsCodeApi();
   window.sendToMain = async (action, param) => {
     const data = {
       id: getUuid(),
+      user: {
+        qid: window.uin,
+      },
       action,
       type: 'simple',
       data: param

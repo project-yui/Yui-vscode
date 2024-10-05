@@ -86,7 +86,7 @@ export const scanLoginCommand = async () => {
     const loadQrCode = async () => {
         handle.removeListener('qrcode_error', update);
         const ws = useWSServer();
-        const resp = await ws.send<{}, QrCodeResponse>('login_by_qrcode', {});
+        const resp = await ws.send<{}, QrCodeResponse>('111', 'login_by_qrcode', {});
         panel.webview.postMessage({ command: 'qrcode', data: resp.qrCodeImage });
         handle.once('qrcode_error', update);
         handle.once('qrcode_scaned', update);

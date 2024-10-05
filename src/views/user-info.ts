@@ -5,6 +5,8 @@ import { useLogger } from '../common/log';
 import { QrCodeResponse } from '../commands/login';
 import { QuickLoginItem } from './types';
 import { getHtml } from '../common/webview';
+import { useUserStore } from '../store/user';
+import { getRenderRequestHandle } from '../server/handle';
 
 const log = useLogger('UserInfoView');
 export class UserInfoViewProvider implements vscode.WebviewViewProvider {
@@ -13,6 +15,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
 
 	private _view?: vscode.WebviewView;
     private _page: string = 'login.html';
+    public _uin: `${number}` = '0';
 
 	constructor(
 		private readonly _extensionUri: vscode.Uri,
@@ -58,16 +61,17 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
                     vscode.window.showWarningMessage(`${resp.data.uin} 已经是登录状态，不能重复登录！`);
                     this.jump('user-info.html');
                     setTimeout(() => {
-                        vscode.commands.executeCommand('yukihana.refreshFriendList');
-                        vscode.commands.executeCommand('yukihana.refreshGroupList');
+                        vscode.commands.executeCommand('yukihana.refreshFriendList', resp.data.uin);
+                        vscode.commands.executeCommand('yukihana.refreshGroupList', resp.data.uin);
                     }, 3000);
                     break;
                 case 'qrcode_success':
                     vscode.window.showInformationMessage(`${resp.data.uin} 登录成功！`);
+                    this._uin = resp.data.uin;
                     this.jump('user-info.html');
                     setTimeout(() => {
-                        vscode.commands.executeCommand('yukihana.refreshFriendList');
-                        vscode.commands.executeCommand('yukihana.refreshGroupList');
+                        vscode.commands.executeCommand('yukihana.refreshFriendList', resp.data.uin);
+                        vscode.commands.executeCommand('yukihana.refreshGroupList', resp.data.uin);
                     }, 3000);
                     break;
                 default:
@@ -77,13 +81,14 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
         const loadQrCode = async () => {
             handle.removeListener('qrcode_error', update);
             const ws = useWSServer();
-            const resp = await ws.send<{}, QrCodeResponse>('login_by_qrcode', {});
+            const resp = await ws.send<{}, QrCodeResponse>('111', 'login_by_qrcode', {});
             webviewView.webview.postMessage({ command: 'qrcode', data: resp.qrCodeImage });
             handle.once('qrcode_error', update);
             handle.once('qrcode_scaned', update);
             handle.once('qrcode_success', update);
             handle.once('qrcode_userLogged', update);
             setTimeout(() => {
+                log.info('remove listener');
                 handle.removeListener('qrcode_error', update);
                 handle.removeListener('qrcode_scaned', update);
                 handle.removeListener('qrcode_success', update);
@@ -93,16 +98,17 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
     
         const loadQuickList = async () => {
             const ws = useWSServer();
-            const list = await ws.send<any, QuickLoginItem[]>('get_quick_login_list', {});
+            const list = await ws.send<any, QuickLoginItem[]>('111', 'get_quick_login_list', {});
             webviewView.webview.postMessage({ command: 'quick-login-list', data: list });
         };
         const quickLogin = async (uin: `${number}`) => {
             const ws = useWSServer();
 
             try{
-                const ret = await ws.send<any, QuickLoginItem[]>('quick_login_by_uin', {
+                const ret = await ws.send<any, QuickLoginItem[]>(uin, 'quick_login_by_uin', {
                     uin
                 });
+                this._uin = uin;
                 this._page = 'user-info.html';
                 this.refresh();
             }
@@ -112,9 +118,22 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
             
             }
         };
-        webviewView.webview.onDidReceiveMessage((data) => {
+        const addAccount = () => {
+            this._page = 'login.html';
+            this.refresh();
+        };
+        webviewView.webview.onDidReceiveMessage(async (data) => {
             log.info('receive from webview:', data);
-            if(data.command === 'refresh-qrcode')
+            if (data.type === 'websocket')
+            {
+                const { send } = useWSServer();
+                const result = await send<any, any>(data.uin, data.action, data.params);
+                webviewView.webview.postMessage({
+                    id: data.id,
+                    result,
+                });
+            }
+            else if(data.command === 'refresh-qrcode')
             {
                 loadQrCode();
             }
@@ -130,9 +149,31 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
             {
                 quickLogin(data.data.uin);
             }
-            else
+            else if (data.command === 'query-user-info')
             {
                 this.userInfoMsg(data);
+            }
+            else if (data.command === 'add-account')
+            {
+                addAccount();
+            }
+            else if (data.command === 'switch-account')
+            {
+                this._uin = data.data.uin;
+                this.jump('user-info.html');
+                setTimeout(() => {
+                    vscode.commands.executeCommand('yukihana.refreshFriendList', data.data.uin);
+                    vscode.commands.executeCommand('yukihana.refreshGroupList', data.data.uin);
+                }, 3000);
+            }
+            else {
+                const handle = getRenderRequestHandle(data.action);
+                const result = await handle(data.data);
+
+                webviewView.webview.postMessage({
+                    id: data.id,
+                    result: result,
+                });
             }
         });
 	}
@@ -140,7 +181,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
     private userInfoMsg(data: any) {
         const queryUserInfo = async () => {
             const { send } = useWSServer();
-            const info = await send('get_self_info', {});
+            const info = await send(data.data.uin, 'get_self_info', {});
             this._view?.webview.postMessage({
                 command: 'update-user-info',
                 data: info,
@@ -153,6 +194,7 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
     }
 
 	public changePage(page: string) {
+        log.info('change page to:', page);
 		if (this._view) {
             this._page = page;
             this._view.webview.html = this._getHtmlForWebview(this._view.webview);
@@ -171,13 +213,15 @@ export class UserInfoViewProvider implements vscode.WebviewViewProvider {
 		    this._view.webview.html = this._getHtmlForWebview(this._view.webview);
         }
     }
-    private refresh() {
+    public refresh() {
 		if (this._view) {
+            log.info('replace html');
+            this._view.webview.html = '';
 		    this._view.webview.html = this._getHtmlForWebview(this._view.webview);
         }
     }
 	private _getHtmlForWebview(webview: vscode.Webview) {
-		return getHtml(webview, this._page);
+		return getHtml(webview, this._page, `window.uin=${this._uin};`);
 	}
 }
 

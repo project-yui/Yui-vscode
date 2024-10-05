@@ -6,6 +6,7 @@ import { FriendTreeProvider } from './views/friend-tree';
 import { useGlobal } from './common/global';
 import { GroupTreeProvider } from './views/group-tree';
 import { registerCommands } from './commands/register';
+import { initServerEvent } from './event/init';
 
 const log = useLogger('Init');
 
@@ -24,14 +25,14 @@ export const init = async (context: vscode.ExtensionContext) => {
 	addView(GroupTreeProvider.viewId, groupTreeView);
     registerCommands(context);
     const { send } = useWSServer();
-    
+    initServerEvent();
     try {
 
-        const info = await send('get_self_info', {});
-        log.info('user info:', info);
-        userInfoView.changePage('user-info.html');
-        vscode.commands.executeCommand('yukihana.refreshFriendList');
-        vscode.commands.executeCommand('yukihana.refreshGroupList');
+        // const info = await send('get_self_info', {});
+        // log.info('user info:', info);
+        // userInfoView.changePage('user-info.html');
+        // vscode.commands.executeCommand('yukihana.refreshFriendList');
+        // vscode.commands.executeCommand('yukihana.refreshGroupList');
     }
     catch(err) {
 

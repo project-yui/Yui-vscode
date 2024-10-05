@@ -28,7 +28,7 @@ export interface FriendGroupItemType {
     id: number,
     name: string
     count: number
-    friend_list: FriendItemType[]
+    friendList: FriendItemType[]
 }
 export interface FriendItemType {
     uin: `${number}`,

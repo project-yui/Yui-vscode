@@ -5,6 +5,10 @@
             display: none;
         }
     </style>
+    <div>
+        选择已登录账号：
+        <select id="accountList"></select>
+    </div>
     <select id="login-mode">
         <option label="qrcode" value="qrcode" selected>1</option>
         <option label="quick" value="quick">2</option>
@@ -169,6 +173,34 @@
     {
         console.log('账户密码登录')
     }
-    refreshQrCode()
+    refreshQrCode();
+    (async () => {
+        const accountList = await sendToWSServer('111', 'get_account_list', {})
+        console.log('account list:', accountList)
+        const selectEle = document.getElementById('accountList')
+        selectEle.onchange = (e) => {
+            console.log('切换账户', e)
+            const uin = e.target.value
+            console.log('uin:', uin)
+            vscode.postMessage({
+                command: 'switch-account',
+                data: {
+                    uin: uin
+                }
+            })
+        }
+        
+        const option = document.createElement('option')
+        option.value = 'login'
+        option.label = 'login'
+        selectEle.appendChild(option)
+        for(const account of accountList)
+        {
+            const option = document.createElement('option')
+            option.value = account
+            option.label = account
+            selectEle.appendChild(option)
+        }
+    })();
     </script>
 </div>

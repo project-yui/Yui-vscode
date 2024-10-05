@@ -7,6 +7,7 @@ const log = useLogger('FriendTree');
 export class FriendTreeProvider implements vscode.TreeDataProvider<FriendItem> {
     public static readonly viewId = 'yukihana.friendTreeView';
     private friendList: FriendGroupItemType[] = [];
+    public uin: `${number}` = '0';
     
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
@@ -20,7 +21,7 @@ export class FriendTreeProvider implements vscode.TreeDataProvider<FriendItem> {
         log.info('get children:', element);
         if (element) {
             const group = this.friendList.find(e => `${e.id}` === element.id);
-            const ret = group?.friend_list.map(e => new FriendItem(e.uin, e.nick, e.remark, e.avatarUrl, vscode.TreeItemCollapsibleState.None));
+            const ret = group?.friendList.map(e => new FriendItem(e.uin, e.nick, e.remark, e.avatarUrl, vscode.TreeItemCollapsibleState.None));
             
             return Promise.resolve(ret || []);
         }
@@ -30,7 +31,8 @@ export class FriendTreeProvider implements vscode.TreeDataProvider<FriendItem> {
             return Promise.resolve(groups);
         }
     }
-    updateGroupData(data: FriendGroupItemType[]) {
+    updateGroupData(uin: `${number}`, data: FriendGroupItemType[]) {
+        this.uin = uin;
         this.friendList = data;
         this._onDidChangeTreeData.fire(undefined);
     }

@@ -2,6 +2,11 @@
     user info
     <div>
         <div>
+            选择账号：
+            <select id="accountList"></select>
+            <button onclick="addAccount()">添加</button>
+        </div>
+        <div>
             头像:
             <img id="infoAvatar" style="height: 100px;width: 100px;"></span>
         </div>
@@ -16,7 +21,45 @@
     </div>
     <script>
     // const vscode = acquireVsCodeApi();
-    
+    function addAccount() {
+        console.log('添加账户')
+        vscode.postMessage({
+            command: 'add-account',
+            data: {
+                uin: window.uin
+            }
+        })
+    }
+    const loadAccountList = async () => {
+        const accountList = await sendToWSServer('1111', 'get_account_list', {})
+        console.log('account list:', accountList)
+        const selectEle = document.getElementById('accountList')
+        selectEle.onchange = (e) => {
+            console.log('切换账户', e)
+            const uin = e.target.value
+            vscode.postMessage({
+                command: 'switch-account',
+                data: {
+                    uin: uin
+                }
+            })
+        }
+        while(selectEle.childNodes.length > 0)
+        {
+            selectEle.removeChild(selectEle.childNodes[0])
+        }
+        for(const account of accountList)
+        {
+            const option = document.createElement('option')
+            option.value = account
+            option.label = account
+            if (account == window.uin)
+            {
+                option.selected = true;
+            }
+            selectEle.appendChild(option)   
+        }
+    }
     window.addEventListener('message', event => {
         const message = event.data; // The JSON data our extension sent
         console.log('receive from main:', message)
@@ -26,6 +69,8 @@
                     infoAvatar.src = message.data.avatarUrl
                     infoUin.textContent = message.data.userUin
                     infoNick.textContent = message.data.nick
+                    window.uin = message.data.userUin
+                    loadAccountList()
                 }
                 break;
         }
@@ -36,6 +81,7 @@
             vscode.postMessage({
                 command: 'query-user-info',
                 data: {
+                    uin: window.uin
                 }
             })
         }
@@ -43,7 +89,8 @@
     vscode.postMessage({
         command: 'query-user-info',
         data: {
+            uin: window.uin
         }
-    })
+    });
     </script>
 </div>

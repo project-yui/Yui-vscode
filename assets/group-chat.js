@@ -73,7 +73,7 @@ class MsgRender {
         let name = msg.senderMemberName;
         if (name.length === 0)
         {
-            const info = await sendToWSServer('get_user_info', {
+            const info = await sendToWSServer(window.selfUin, 'get_user_info', {
                     userUid: msg.senderUid,
                 });
             name = info.nick;
@@ -334,7 +334,7 @@ const addOldMsgToList = async (msgList) => {
 (async () => {
     // 获取群消息
     console.log('start to get group msg');
-    const list = await sendToWSServer('get_group_msg', {
+    const list = await sendToWSServer(window.selfUin, 'get_group_msg', {
             code: groupCode,
             msgId: '0',
             cnt: 10

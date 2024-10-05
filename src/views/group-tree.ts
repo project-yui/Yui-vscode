@@ -7,6 +7,7 @@ const log = useLogger('GroupTree');
 export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
     public static readonly viewId = 'yukihana.groupTreeView';
     private groupList: GroupGroupItemType[] = [];
+    public uin: `${number}` = '0';
     
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
@@ -20,8 +21,14 @@ export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
         log.info('get children:', element);
         if (element) {
             const group = this.groupList.find(e => `${e.id}` === element.id);
-            const ret = group?.groupList.map(e => new GroupItem(e.id, e.name, e.code, e.avatarUrl, vscode.TreeItemCollapsibleState.None));
-            
+            const ret = group?.groupList.map(e => {
+                const item = new GroupItem(e.id, e.name, e.code, e.avatarUrl, vscode.TreeItemCollapsibleState.None);
+                if (item.collapsibleState === vscode.TreeItemCollapsibleState.None)
+                {
+                    item.command = { command: 'yukihana.openGroup', title: "Open Group Chat", arguments: [this.uin, e.code], };
+                }
+                return item;
+            });
             return Promise.resolve(ret || []);
         }
         else
@@ -30,7 +37,8 @@ export class GroupTreeProvider implements vscode.TreeDataProvider<GroupItem> {
             return Promise.resolve(groups);
         }
     }
-    updateGroupData(list: GroupDetailInfoResp[]) {
+    updateGroupData(uin: `${number}`, list: GroupDetailInfoResp[]) {
+        this.uin = uin;
         // 置顶群聊
         const topGroup: GroupGroupItemType = {
           id: 0,
@@ -135,10 +143,6 @@ class GroupItem extends vscode.TreeItem {
         this.description = this.groupCode;
         if (this.avatarUrl.length > 0) {
             this.iconPath = vscode.Uri.parse(this.avatarUrl);
-        }
-        if (collapsibleState === vscode.TreeItemCollapsibleState.None)
-        {
-            this.command = { command: 'yukihana.openGroup', title: "Open Group Chat", arguments: [this.groupCode], };
         }
     }
     

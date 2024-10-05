@@ -42,8 +42,14 @@ const receive = (data: WebSocket.RawData) => {
     resp = convertToCamelCase(resp);
     if (!resp.id)
     {
+        let eventName = resp.detailType;
+        if (resp.subType && resp.subType.length > 0)
+        {
+            eventName += `/${resp.subType}`;
+        }
         // event
-        eventHandle.emit(resp.detailType, resp);
+        log.info('start to emit:', eventName, resp);
+        eventHandle.emit(eventName, resp);
         return;
     }
     if (!waitMap[resp.id]) {return;}
@@ -68,8 +74,8 @@ const delay = async (time: number) => {
 /**
  * 发送websocket消息
  */
-const send = async <Req, Resp>(action: string, params: Req) => {
-    log.info('send msg:', action, params);
+const send = async <Req, Resp>(uin: `${number}`, action: string, params: Req) => {
+    log.info('send msg:', uin, action, params);
     if (!server || server.readyState === WebSocket.CLOSED || server.readyState === WebSocket.CLOSING)
     {
         server = new WebSocket('ws://127.0.0.1:8080', {
@@ -91,6 +97,9 @@ const send = async <Req, Resp>(action: string, params: Req) => {
     }
     let req: BotActionRequest<Req> = {
         id: randomUUID(),
+        user: {
+            qid: uin,
+        },
         action: action,
         params: params
     };
