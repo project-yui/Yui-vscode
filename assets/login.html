@@ -175,7 +175,7 @@
     }
     refreshQrCode();
     (async () => {
-        const accountList = await sendToWSServer('111', 'get_account_list', {})
+        const accountList = await sendToWSServer(window.uin, 'get_account_list', {})
         console.log('account list:', accountList)
         const selectEle = document.getElementById('accountList')
         selectEle.onchange = (e) => {

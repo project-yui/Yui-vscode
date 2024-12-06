@@ -25,9 +25,11 @@ const commands: Record<string, (...args: any[]) => any> = {
         {
             _uin = uin;
         }
+        else {
+            _uin = getView<UserInfoViewProvider>(UserInfoViewProvider.viewId)._uin;
+        }
         const groupList = await send<{}, GroupDetailInfoResp[]>(_uin, 'get_group_list', {});
         p?.updateGroupData(_uin, groupList);
-        
     },
     'yukihana.refreshFriendList': async (uin?: `${number}`) => {
         log.info('refreshFriendList:', uin);
@@ -37,10 +39,12 @@ const commands: Record<string, (...args: any[]) => any> = {
         {
             _uin = uin;
         }
+        else {
+            _uin = getView<UserInfoViewProvider>(UserInfoViewProvider.viewId)._uin;
+        }
         const friendList = await send<{}, FriendGroupItemType[]>(_uin, 'get_friend_list', {});
         log.info('friend list:', friendList);
         p?.updateGroupData(_uin, friendList);
-        
     },
     'yukihana.refreshUserInfo': async (uin?: `${number}`) => {
         log.info('refreshUserInfo:', uin);

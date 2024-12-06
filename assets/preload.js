@@ -137,7 +137,7 @@ window.vscode = acquireVsCodeApi();
     const data = {
       id: getUuid(),
       user: {
-        qid: window.uin,
+        uin: window.uin,
       },
       action,
       type: 'simple',

@@ -5,7 +5,7 @@ import { chmodSync, cpSync, existsSync, readdir, renameSync, rmSync, writeFileSy
 import Downloader from "nodejs-file-downloader";
 import path from "path";
 
-const doenloadYukihana = async (file: string, targetFile: string, filepath: string) => {
+const downloadYukihana = async (file: string, targetFile: string, filepath: string) => {
     const downloader = new Downloader({
         url: `https://github.com/project-yukihana/Yukihana/releases/download/v1.1.4/${file}`, // If the file name already exists, a new file with the name 200MB1.zip is created.
         directory: filepath, // This folder will be created, if it doesn't exist.
@@ -173,10 +173,8 @@ const windows = async () => {
         if (!existsSync(path.resolve(filepath, 'index.original.js')))
         {
             renameSync(path.resolve(filepath, 'index.js'), path.resolve(filepath, 'index.original.js'));
-            await doenloadYukihana('core.js', 'index.js', filepath);
-            await doenloadYukihana('server.key', 'server.key', filepath);
-            await doenloadYukihana('server.crt', 'server.crt', filepath);
-            await doenloadYukihana('yukihana.yaml', 'yukihana.yaml', filepath);
+            await downloadYukihana('core.js', 'index.js', filepath);
+            await downloadYukihana('yukihana.yaml', 'yukihana.yaml', filepath);
         }
     }
     // 清理
@@ -272,10 +270,10 @@ const linux = async () => {
         if (!existsSync(path.resolve(filepath, 'index.original.js')))
         {
             renameSync(path.resolve(filepath, 'index.js'), path.resolve(filepath, 'index.original.js'));
-            await doenloadYukihana('core.js', 'index.js', filepath);
-            await doenloadYukihana('server.key', 'server.key', filepath);
-            await doenloadYukihana('server.crt', 'server.crt', filepath);
-            await doenloadYukihana('yukihana.yaml', 'yukihana.yaml', filepath);
+            await downloadYukihana('core.js', 'index.js', filepath);
+            await downloadYukihana('server.key', 'server.key', filepath);
+            await downloadYukihana('server.crt', 'server.crt', filepath);
+            await downloadYukihana('yukihana.yaml', 'yukihana.yaml', filepath);
         }
     }
     // 清理

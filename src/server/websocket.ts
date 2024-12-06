@@ -98,7 +98,7 @@ const send = async <Req, Resp>(uin: `${number}`, action: string, params: Req) =>
     let req: BotActionRequest<Req> = {
         id: randomUUID(),
         user: {
-            qid: uin,
+            uin: uin,
         },
         action: action,
         params: params

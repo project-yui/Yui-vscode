@@ -74,7 +74,7 @@ class MsgRender {
         if (name.length === 0)
         {
             const info = await sendToWSServer(window.selfUin, 'get_user_info', {
-                    userUid: msg.senderUid,
+                    user_uid: msg.senderUid,
                 });
             name = info.nick;
         }
@@ -312,6 +312,7 @@ const addOldMsgToList = async (msgList) => {
     let preMsg = {
         time: 0
     };
+    // 统一获取发送者的信息
     for (let i=0; i<msgList.length; i++) {
         const curMsg = msgList[i];
         if (curMsg.time - preMsg.time > 60 * 5)

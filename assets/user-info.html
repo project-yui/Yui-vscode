@@ -31,7 +31,7 @@
         })
     }
     const loadAccountList = async () => {
-        const accountList = await sendToWSServer('1111', 'get_account_list', {})
+        const accountList = await sendToWSServer(window.uin, 'get_account_list', {})
         console.log('account list:', accountList)
         const selectEle = document.getElementById('accountList')
         selectEle.onchange = (e) => {
@@ -69,7 +69,8 @@
                     infoAvatar.src = message.data.avatarUrl
                     infoUin.textContent = message.data.userUin
                     infoNick.textContent = message.data.nick
-                    window.uin = message.data.userUin
+                    if (message.data.uin)
+                        window.uin = message.data.uin
                     loadAccountList()
                 }
                 break;
@@ -85,7 +86,7 @@
                 }
             })
         }
-    }, 1000)
+    }, 60000)
     vscode.postMessage({
         command: 'query-user-info',
         data: {

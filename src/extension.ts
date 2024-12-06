@@ -84,8 +84,9 @@ export function activate(context: vscode.ExtensionContext) {
 					...process.env,
 					YUKIHANA_LOG: 'true',
 					ELECTRON_RUN_AS_NODE: '1',
+					ELECTRON_ATTACH_CONSOLE: '1',
 					YUKIHANA_ACTION: 'dev',
-					YUKIHANA_NATIVE: "D:/GitHub/Yukihana-native/build/nt_native.node",
+					YUKIHANA_NATIVE: "D:/GitHub/Yui-native/build/nt_native.node",
 				
 				},
 				detached: true,
